@@ -55,7 +55,6 @@ namespace Crossroad
         public Rectangle view { get; set; } = new();
         public TransformGroup transformGroup { get; set; } = new();
 
-        public string color;
 
         public RoadParts RoadPart { get; set; } = 0;
         public uint QueueIndex { get; set; } = 0;

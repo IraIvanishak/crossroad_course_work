@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\user\Desktop\Crossroad\obj\Debug\net6.0-windows\
+C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\
 Crossroad
 none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
-C:\Users\user\Desktop\Crossroad\App.xaml
+C:\Users\user\Desktop\CourseWork\git\crossroad\App.xaml
 11407045341
 
 12454880118
 194-97651837
 MainWindow.xaml;
 
-False
+True
 
