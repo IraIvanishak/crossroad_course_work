@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\user\\Desktop\\CourseWork\\Program\\Crossroad\\Crossroad.csproj",
+      "projectUniqueName": "C:\\Users\\user\\Desktop\\CourseWork\\Crossroad\\Crossroad.csproj",
       "projectName": "Crossroad",
-      "projectPath": "C:\\Users\\user\\Desktop\\CourseWork\\Program\\Crossroad\\Crossroad.csproj",
+      "projectPath": "C:\\Users\\user\\Desktop\\CourseWork\\Crossroad\\Crossroad.csproj",
       "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\user\\Desktop\\CourseWork\\Program\\Crossroad\\obj\\",
+      "outputPath": "C:\\Users\\user\\Desktop\\CourseWork\\Crossroad\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",

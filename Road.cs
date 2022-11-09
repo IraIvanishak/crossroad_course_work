@@ -1,175 +1,160 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
-
+using static Crossroad.RoadSizes;
+using System.Collections.Generic;
 
 namespace Crossroad
 {
-    public class Road 
+    public static class Road
     {
-        public Road( Canvas fild )
+
+        public static Canvas[] LanesSet { set; get; } = new Canvas[ROADS_COUNT];
+        public static Crosswalk[] CrosswalkSet { set; get; } = new Crosswalk[ROADS_COUNT];
+        public static TrafficLight[] LightsSet { set; get; } = new TrafficLight[ROADS_COUNT];
+        public static ObservableCollection<Car> Cars { set; get; } = new();
+        public static Axes Axis { set; get; } = Axes.Horizontal; 
+        public static int Lane { set; get; } = 1;
+        public static double LaneWidth { set; get; } = GEWAY_ONE_LANE_WIDTH;
+        public static double TLTime { set; get; } = TRAFFIC_LIGHT_DEF_TIME;
+
+        public static double CarPeriod { set; get; } = 0;
+        public static double PedestrianPeriod { set; get; } = 0;
+        public static Timer CarTimer { set; get; } = new();
+        public static Timer PedestrianTimer { set; get; } = new();
+
+        public static void Go()
         {
-            this.fild = fild;
-            TrafficLight.fild = fild;
-            SetTLights();
-
-            Lane = 1;
-            LaneWidth = RoadWidth;
-            SetPattern();
-
-
-            var bSetLane = new Button()
+            Timer GoTimer = new();
+            GoTimer.Interval = UPDATE_TIME;
+            GoTimer.Elapsed += (s, e) =>
             {
-                Width = 30,
-                Height = 30,
-                Content = "+",
-                
+                Application.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    var workPedestrians = CrosswalkSet
+                        .Where(cs => cs.locAxis == Axis);
+
+                    foreach (var p in workPedestrians)
+                        if (p.Pedestrians.Count != 0) p.go();
+
+
+                    var workCars = Cars
+                        .Where(c =>
+                            ((int)c.RoadPart % 2 == (int)Axis)
+                            && (c.QueueIndex == 0))
+                        .ToList();
+
+                    foreach (var c in workCars)
+                    {
+                        c.move();
+                        var currentLaneCars = Cars
+                        .Where(a =>
+                               a.RoadPart == c.RoadPart
+                               && a.InLane == c.InLane);
+
+                        foreach (var a in currentLaneCars)
+                            a.getCloser();
+                    }
+                });
             };
-
-            bSetLane.Click += new RoutedEventHandler(LaneHandler);
-
-
-
-            Canvas.SetBottom(bSetLane, 0);
-            Canvas.SetLeft(bSetLane, fild.Width/2 - bSetLane.Width);
-            fild.Children.Add(bSetLane);
-
+            GoTimer.Start();
 
         }
-
-        public Canvas fild;
-
-        static int RoadWidth = 86;
-        static int RoadHeight = 214;
-
-        public void SetPattern()
+        public static void UpdateCars()
         {
-            lanesSet = new Canvas[4];
-
-            for (int j = 0; j < 360; j += 90)
+            Car.EndPoint = new uint[ROADS_COUNT, 2];           
+            foreach (Car car in Cars)
             {
-                var laneUnit = new Canvas()
-                {
-                    Width = 2 * RoadWidth,
-                    Height = RoadHeight,
-                 //      Background = new SolidColorBrush(Colors.Blue),
-
-                };
-
-                Canvas.SetBottom(laneUnit, 0);
-                Canvas.SetLeft(laneUnit, fild.Width / 2 - laneUnit.Width / 2);
-
-                var r = new RotateTransform();
-                r.Angle = j;
-                r.CenterX = RoadWidth;
-                r.CenterY = -1 * RoadWidth;
-
-                laneUnit.RenderTransform = r;
-                
-
-                TrafficLight trafficLight = new TrafficLight();
-                Canvas.SetRight(trafficLight.TLight, -1*trafficLight.Size-10);
-                laneUnit.Children.Add(trafficLight.TLight);
-
-                fild.Children.Add(laneUnit);
-                lanesSet[j / 90] = laneUnit;
-
+                LanesSet[(int)car.RoadPart].Children.Remove(car.view);
+                car.transformGroup.Children.Clear();
+                car.locateOnRoad();
             }
         }
-        public void SetTLights()
+        public static RoadParts GetOppositeRoad(int r)
         {
-           
-
+            return (RoadParts)((r + 2) % ROADS_COUNT);
         }
-      
-        public int LaneWidth { get; set; }
-
-        private Canvas[] lanesSet;
-
-        public void LaneHandler(object sender, RoutedEventArgs e)
+        public static RoadParts GetFutureRoad(int d, int r)
         {
-          
-            Button x = sender as Button;
-            if (x.Content.ToString() == "-")
+            return (RoadParts)((d + r + 1) % ROADS_COUNT);
+        }
+        public static void GenerateTraffic()
+        {
+            var random = new Random();
+            var car = new Car((RoadParts)random.Next(ROADS_COUNT-1),
+                (CarDirections)random.Next(DIRECTIONS_COUNT-1));
+            Cars.Add(car);
+
+            CarTimer.Interval = CarPeriod;
+            CarTimer.Elapsed += (s,e) =>
             {
-                for (int i = 0; i < 4; i++)
+
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    int index=0;
-                    for (int j = 0; j < lanesSet[i].Children.Count; j++)
+                    var activeCars = Car.InMovement.Where(c =>
+                        c.CarDirection == CarDirections.OnLeft);
+
+                    var availableRoads = new List<RoadParts>()
+                            { RoadParts.South,  RoadParts.West, RoadParts.North, RoadParts.East };
+
+                    if (activeCars is not null)
                     {
-                        if(lanesSet[i].Children[j] is Line) {
-                            index = j;
-                            break;
+                        foreach (var activeCar in activeCars)
+                        {
+                            availableRoads.Remove(GetOppositeRoad((int)activeCar.RoadPart));
                         }
                     }
 
-                    lanesSet[i].Children.RemoveRange(index, 2);
-                }
-                Lane--;
-                x.Content = "+";
-            }
-            else
+                    var r = random.Next(availableRoads.Count);
+                    var car = new Car(availableRoads[r],
+                        (CarDirections)random.Next(DIRECTIONS_COUNT - 1));
+
+                    Cars.Add(car);
+
+                });
+
+            };
+           
+            CarTimer.Start();
+
+            PedestrianTimer.Interval = PedestrianPeriod;
+            PedestrianTimer.Elapsed += (s, e) =>
             {
-                Lane++;
-                x.Content = "-";
-            }   
-
-            LaneWidth = RoadWidth / Lane;
-
-             for (int j = 0;  j < 4; j++)
-            {
-
-                                
-                for (int i = LaneWidth, q = 1; i < 2 * RoadWidth; i += LaneWidth, q++)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    if (q == Lane)
+                    var workPedestrians = CrosswalkSet
+                         .SelectMany(cs => cs.Pedestrians)
+                         .ToList();
+
+                    var availableRoads = Enumerable.Range(0, ROADS_COUNT).ToList();
+                    foreach (var road in CrosswalkSet)
                     {
-                        i += 5;
-                        continue;
+                        if (workPedestrians
+                            .Where(p => p.RoadPart == road.RoadPart)
+                            .Count() == PEDESTRIAN_DIRECTIONS_COUNT)
+                            availableRoads.Remove((int)road.RoadPart);
                     }
-                    var line = new Line()
+
+                    if (availableRoads.Count != 0)
                     {
-                        StrokeDashArray = new DoubleCollection() { 4, 3 },
-                        StrokeThickness = 2,
-                        X1 = i,
-                        X2 = i,
-                        Y1 = 0,
-                        Y2 = lanesSet[j].Height*0.7,
-                        Stroke = new SolidColorBrush(Colors.White),
-                    };
-                    Canvas.SetBottom(line, 0);
-                    lanesSet[j].Children.Add(line);
+                            var r = random.Next(availableRoads.Count);
+                            var availableDirections = new List<PedestrianDirections>()
+                            { PedestrianDirections.Forward, PedestrianDirections.Backward };
 
-                    
-                }
+                            var pedestrian = workPedestrians.FirstOrDefault(p => (int)p.RoadPart == availableRoads[r]);
+                            if (pedestrian is not null)
+                                availableDirections.Remove(pedestrian.Direction);
 
-                
-            }
+                            var d = random.Next(availableDirections.Count);
+                            CrosswalkSet[availableRoads[r]].addPedestrian(availableDirections[d]);
+                    }
+                });
+            };
+
+            PedestrianTimer.Start();
         }
-
-
-        private int lane;
-        public int Lane { 
-            get { return lane; } 
-            set {                 
-                lane = value; 
-                
-            } 
-        }
-
-
-
     }
 }

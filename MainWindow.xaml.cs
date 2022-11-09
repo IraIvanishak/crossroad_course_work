@@ -20,10 +20,18 @@ namespace Crossroad
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly IInterfaceBuilder _interfaceBuilder;
+
         public MainWindow()
         {
             InitializeComponent();
-            var cr = new Road(fild);
-        }
+
+            _interfaceBuilder = new InterfaceBuilder();
+
+            _interfaceBuilder.BuildPattern()
+                .BuildCrosswalks()
+                .BuildButtoms()
+                .BuildTrafficLights();
+        }      
     }
 }

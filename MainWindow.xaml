@@ -6,274 +6,513 @@
         xmlns:local="clr-namespace:Crossroad"
         mc:Ignorable="d"
         Title="MainWindow" Name="window"
-        Height="630" Width="600">
+        Height="640" Width="965">
 
-    <Canvas  Name="fild"  
-             HorizontalAlignment="Center" 
-             VerticalAlignment="Center"
+
+    <Grid Background="#FFFDFFF9">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="600"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="1" 
+              Margin="30" 
+              >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Label Margin="5, -5" Content="Панель керування" FontFamily="Roboto Black" Foreground="#FF5E5E5E" FontSize="14" FontWeight="Normal"/>
+
+            <Border BorderBrush="#FFB8B8B8"                     
+                    BorderThickness="0"
+                    Margin="0, 5"
+                     Grid.Row="1"
+                    CornerRadius="15,15,15,15" Background="White">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="15" Opacity="0.08" Direction="300"/>
+                </Border.Effect>
+                <Grid Margin="15" Background="White" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.2*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Margin="-5" Content="режим" FontFamily="Roboto Light" Foreground="#FF5E5E5E" FontSize="14" FontWeight="Normal"/>
+                    <RadioButton Grid.Row="1" Grid.Column="1" 
+                                 Name="manual"
+                                 IsChecked="True"
+                                 Content="ручний" FontFamily="Roboto " FontSize="14" BorderBrush="Black"/>
+                    <Grid x:Name="control"
+                          Visibility="Collapsed"
+                          Grid.Row="2" Grid.ColumnSpan="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+
+                        <Label Margin="-5,10,0,0" 
+                           Visibility="Visible"
+                           Content="період появи машин" FontFamily="Roboto Light" Foreground="#FF5E5E5E" FontSize="14" FontWeight="Normal"/>
+                        <TextBox Grid.Column="0" 
+                                 Name="carF"
+                                 Grid.Row="1"
+                                 Width="50"
+                                 HorizontalAlignment="Left"
+                                 Height="20" BorderBrush="#FF5F5F5F" Foreground="#FF333333" Margin="0,0,0,0" Padding="4,0,4,0">
+                            <TextBox.Resources>
+                                <Style TargetType="{x:Type Border}">
+                                    <Setter Property="CornerRadius" Value="5"/>
+                                </Style>
+                            </TextBox.Resources>
+                        </TextBox>
+                            <Label Margin="50,0,0,0" 
+                               Grid.Column="0"
+                               Grid.Row="1"
+                           Visibility="Visible"
+                           Content="с." FontFamily="Roboto" Foreground="Black" FontSize="14" FontWeight="Normal"/>
+
+                        <Label Margin="-5,0" 
+                               Grid.Row="2"
+                           Visibility="Visible"
+                           Content="період появи пішоходів" FontFamily="Roboto Light" Foreground="#FF5E5E5E" FontSize="14" FontWeight="Normal"/>
+                        <TextBox Grid.Column="0" 
+                                 Width="50"
+                                 Name="pedestrianF"
+                                 Grid.Row="3"
+                                 HorizontalAlignment="Left"
+                                 Height="20" BorderBrush="#FF5F5F5F" Foreground="#FF333333" Padding="4,0,4,0">
+                            <TextBox.Resources>
+                                <Style TargetType="{x:Type Border}">
+                                    <Setter Property="CornerRadius" Value="5"/>
+                                </Style>
+                            </TextBox.Resources>
+                        </TextBox>
+                        <Label Margin="50,0,0,0" 
+                               Grid.Column="0"
+                               Grid.Row="3"
+                           Visibility="Visible"
+                           Content="с." FontFamily="Roboto" Foreground="Black" FontSize="14" FontWeight="Normal"/>
+
+                        <Label Margin="-5,0" 
+                               Grid.Row="4"
+                           Visibility="Visible"
+                           Content="режим світлофора" FontFamily="Roboto Light" Foreground="#FF5E5E5E" FontSize="14" FontWeight="Normal"/>
+                        <TextBox Grid.Column="0" 
+                                 Width="50"
+                                 Name="lightF"
+                                 Grid.Row="5"
+                                 HorizontalAlignment="Left"
+                                 Height="20" BorderBrush="#FF5F5F5F" Foreground="#FF333333" Padding="4,0,4,0">
+
+                            <TextBox.Resources>
+                                <Style TargetType="{x:Type Border}">
+                                    <Setter Property="CornerRadius" Value="5"/>
+                                </Style>
+                            </TextBox.Resources>
+                        </TextBox>
+                        <Label Margin="50,0,0,0" 
+                               Grid.Column="0"
+                               Grid.Row="5"
+                           Visibility="Visible"
+                           Content="с." FontFamily="Roboto" Foreground="Black" FontSize="14" FontWeight="Normal"/>
+
+                    </Grid>
+
+                    <RadioButton Grid.Row="1" 
+                                 Name="auto"
+                                 Grid.Column="0" FontFamily="Roboto " Content="автоматичний" FontSize="14" BorderBrush="Black"/>
+
+
+                </Grid>
+            </Border>
+
+            <Border BorderBrush="#FFB8B8B8" 
+                    Grid.Row="2"
+                    Margin="0, 5"
+                    BorderThickness="0" 
+                    CornerRadius="15,15,15,15" Background="White">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="15" Opacity="0.08" Direction="300"/>
+                </Border.Effect>
+                <Grid Margin="15" Background="White" >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.8*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Margin="-5" Content="кількість смуг" FontFamily="Roboto Light" Foreground="#FF5E5E5E" FontSize="14" FontWeight="Normal"
+                           Grid.ColumnSpan="2"
+                           />
+                    <Grid Grid.Row="2">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="25"/>
+                            <ColumnDefinition Width="30"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border
+                            BorderBrush="#FF5E5E5E"
+                               BorderThickness="0.5"
+                               Height="25"
+                               Width="25"
+                            CornerRadius="8,0,0,8" Background="#FFDDFF99"
+                            >
+                            <Label                                
+                                Content="1" Padding="9,5,0,5" 
+                                Grid.RowSpan="2" 
+                                x:FieldModifier="public"
+                                x:Name="val"
+                                FontFamily="Inter SemiBold"
+                               />
+                        </Border>
+
+                        <Button 
+                            
+                                Grid.Column="1"
+                                Content="+"
+                                Name="bLane"
+                                FontFamily="Roboto Medium" FontSize="14" 
+                                BorderThickness="0.5"
+                                Margin="-0.5,0"
+                                Width="30"
+                                HorizontalAlignment="Center" 
+                                Background="{x:Null}" BorderBrush="#FF5E5E5E"
+                            >
+                            <Button.Resources>
+                                <Style TargetType="{x:Type Border}">
+                                    <Setter Property="CornerRadius" Value="0,8,8,0"/>
+                                </Style>
+                            </Button.Resources>
+                        </Button>
+
+
+                    </Grid>
+
+
+                </Grid>
+            </Border>
+            <Button Grid.Row="3" 
+                    Name="go"
+                    Margin="0,10"
+                    Content="Розпочати"
+                    Height="40" FontFamily="Roboto Medium" FontSize="16" BorderBrush="{x:Null}" Foreground="White" Background="Gray">
+                <Button.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="15"/>
+                    </Style>
+                </Button.Resources>
+                <Button.Effect>
+                    <DropShadowEffect BlurRadius="15" Opacity="0.08" Direction="300"/>
+                </Button.Effect>
+
+            </Button>
+
+        </Grid>
+
+        <Canvas  Name="fild"   
+             ClipToBounds="True"
+             Grid.Column="0"
              Height="600" Width="600"
              Background="#FFCFFFB9" >
-        <Grid 
-            Height="600" Width="600"
-             HorizontalAlignment="Center" VerticalAlignment="Center">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="1.5*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="100" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="100" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="1.5*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="100" />
-            </Grid.RowDefinitions>
+            <Grid 
+            Height="600" Width="600">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="1.6*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="100" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="100" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="1.6*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="100" />
+                </Grid.RowDefinitions>
 
-            <Rectangle 
+                <Rectangle 
                 Grid.Column="2"
                 Grid.RowSpan="5"
                 Fill="Gray" />
 
-            <Grid Grid.Column="2" 
+                <Grid Grid.Column="2" 
                   Grid.RowSpan="2">
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="5"/>
-                    <ColumnDefinition Width="5"/>
-                    <ColumnDefinition Width="5"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="10"/>
-                    <RowDefinition Height="35"/>
-                </Grid.RowDefinitions>
-                <Rectangle Fill="White"
-                           Grid.Column="1"
-                           />
-                <Rectangle Fill="White"
-                           Grid.Column="3"
-                           />
-                <Grid Grid.Row="3" Grid.ColumnSpan="5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="1.5*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="1.5*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="1.5*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="1.5*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="1.5*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="5"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Rectangle Fill="White" Grid.Column="0" />
-                    <Rectangle Fill="White" Grid.Column="2" />
-                    <Rectangle Fill="White" Grid.Column="4" />
-                    <Rectangle Fill="White" Grid.Column="6" />
-                    <Rectangle Fill="White" Grid.Column="8" />
-                    <Rectangle Fill="White" Grid.Column="10" />
 
-                </Grid>
-                <Rectangle 
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="35"/>
+                    </Grid.RowDefinitions>
+                    <Rectangle Fill="White"
+                           Grid.Column="1"
+                           />
+                    <Rectangle Fill="White"
+                           Grid.Column="3"
+                           />
+                    <Grid Grid.Row="3" Grid.ColumnSpan="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Rectangle Fill="White" Grid.Column="0" />
+                        <Rectangle Fill="White" Grid.Column="2" />
+                        <Rectangle Fill="White" Grid.Column="4" />
+                        <Rectangle Fill="White" Grid.Column="6" />
+                        <Rectangle Fill="White" Grid.Column="8" />
+                        <Rectangle Fill="White" Grid.Column="10" />
+                        <Rectangle Fill="White" Grid.Column="12" />
+                        <Rectangle Fill="White" Grid.Column="14" />
+
+                    </Grid>
+                    <Rectangle 
                     Fill="White"
                     Grid.Row="1"
                     Margin="0, -8, 0,10"
                     />
-            </Grid>
+                </Grid>
 
-            <Grid Grid.Column="2" 
+                <Grid Grid.Column="2" 
                   Grid.Row="3"
                   Grid.RowSpan="2">
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="5"/>
-                    <ColumnDefinition Width="5"/>
-                    <ColumnDefinition Width="5"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="35"/>
-                    <RowDefinition Height="10"/>
-                    <RowDefinition Height="*"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="*"/>
 
-                </Grid.RowDefinitions>
-                <Rectangle Fill="White"
+                    </Grid.RowDefinitions>
+                    <Rectangle Fill="White"
                            Grid.Row="2"
                            Grid.Column="1"
                            />
-                <Rectangle Fill="White"
+                    <Rectangle Fill="White"
                            Grid.Row="2"
                            Grid.Column="3"
                            />
-                <Grid Grid.Row="0" Grid.ColumnSpan="5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="1.5*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="1.5*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="1.5*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="1.5*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="1.5*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Rectangle Fill="White" Grid.Column="0" />
-                    <Rectangle Fill="White" Grid.Column="2" />
-                    <Rectangle Fill="White" Grid.Column="4" />
-                    <Rectangle Fill="White" Grid.Column="6" />
-                    <Rectangle Fill="White" Grid.Column="8" />
-                    <Rectangle Fill="White" Grid.Column="10" />
+                    <Grid Grid.Row="0" Grid.ColumnSpan="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="1.1*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Rectangle Fill="White" Grid.Column="0" />
+                        <Rectangle Fill="White" Grid.Column="2" />
+                        <Rectangle Fill="White" Grid.Column="4" />
+                        <Rectangle Fill="White" Grid.Column="6" />
+                        <Rectangle Fill="White" Grid.Column="8" />
+                        <Rectangle Fill="White" Grid.Column="10" />
+                        <Rectangle Fill="White" Grid.Column="12" />
+                        <Rectangle Fill="White" Grid.Column="14" />
 
-                </Grid>
-                <Rectangle 
+                    </Grid>
+                    <Rectangle 
                     Fill="White"
                     Grid.Row="1"
                     Grid.Column="4"
                     Margin="0, 10, 0,-8"
                     />
-            </Grid>
+                </Grid>
 
-            <Rectangle 
+                <Rectangle 
                 Grid.Row="2"
                 Grid.ColumnSpan="5"
                 Fill="Gray" />
 
-            <Grid Grid.Column="0" 
+                <Grid Grid.Column="0" 
                   Grid.Row="2"
                   Grid.ColumnSpan="2">
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="10"/>
-                    <ColumnDefinition Width="35"/>
-
-                </Grid.ColumnDefinitions>
-
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="5"/>
-                    <RowDefinition Height="5"/>
-                    <RowDefinition Height="5"/>
-                    <RowDefinition Height="*"/>
-
-                </Grid.RowDefinitions>
-                <Rectangle Fill="White"
-                           Grid.Row="1"
-                           />
-                <Rectangle Fill="White"
-                           Grid.Row="3"
-                           />
-                <Grid Grid.Column="2" Grid.RowSpan="5">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="35"/>
 
                     </Grid.ColumnDefinitions>
 
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="1.5*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="1.5*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="1.5*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="1.5*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="1.5*"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="5"/>
                         <RowDefinition Height="*"/>
 
                     </Grid.RowDefinitions>
-                    <Rectangle Fill="White"  Grid.Row="0" />
-                    <Rectangle Fill="White"  Grid.Row="2" />
-                    <Rectangle Fill="White"  Grid.Row="4" />
-                    <Rectangle Fill="White"  Grid.Row="6" />
-                    <Rectangle Fill="White"  Grid.Row="8" />
-                    <Rectangle Fill="White"  Grid.Row="10" />
+                    <Rectangle Fill="White"
+                           Grid.Row="1"
+                           />
+                    <Rectangle Fill="White"
+                           Grid.Row="3"
+                           />
+                    <Grid Grid.Column="2" Grid.RowSpan="5">
+                        <Grid.ColumnDefinitions>
+
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+
+                        </Grid.RowDefinitions>
+                        <Rectangle Fill="White"  Grid.Row="0" />
+                        <Rectangle Fill="White"  Grid.Row="2" />
+                        <Rectangle Fill="White"  Grid.Row="4" />
+                        <Rectangle Fill="White"  Grid.Row="6" />
+                        <Rectangle Fill="White"  Grid.Row="8" />
+                        <Rectangle Fill="White"  Grid.Row="10" />
+                        <Rectangle Fill="White"  Grid.Row="12" />
+                        <Rectangle Fill="White"  Grid.Row="140" />
 
 
-                </Grid>
-                <Rectangle 
+                    </Grid>
+                    <Rectangle 
                     Fill="White"
                     Grid.Column="1"
                     Grid.Row="4"
                     Margin="-8, 0, 10, 0"
                     />
-            </Grid>
+                </Grid>
 
-            <Grid Grid.Column="3" 
+                <Grid Grid.Column="3" 
                   Grid.Row="2"
                   Grid.ColumnSpan="2">
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="35"/>
-                    <ColumnDefinition Width="10"/>
-                    <ColumnDefinition Width="*"/>
-
-                </Grid.ColumnDefinitions>
-
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="5"/>
-                    <RowDefinition Height="5"/>
-                    <RowDefinition Height="5"/>
-                    <RowDefinition Height="*"/>
-
-                </Grid.RowDefinitions>
-                <Rectangle Fill="White"
-                           Grid.Column="2"
-                           Grid.Row="1"
-                           />
-                <Rectangle Fill="White"
-                           Grid.Column="2"
-                           Grid.Row="3"
-                           />
-                <Grid Grid.Column="0" Grid.RowSpan="5">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="35"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
 
                     </Grid.ColumnDefinitions>
 
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="1.5*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="1.5*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="1.5*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="1.5*"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="1.5*"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="5"/>
                         <RowDefinition Height="*"/>
 
                     </Grid.RowDefinitions>
-                    <Rectangle Fill="White"  Grid.Row="0" />
-                    <Rectangle Fill="White"  Grid.Row="2" />
-                    <Rectangle Fill="White"  Grid.Row="4" />
-                    <Rectangle Fill="White"  Grid.Row="6" />
-                    <Rectangle Fill="White"  Grid.Row="8" />
-                    <Rectangle Fill="White"  Grid.Row="10" />
+                    <Rectangle Fill="White"
+                           Grid.Column="2"
+                           Grid.Row="1"
+                           />
+                    <Rectangle Fill="White"
+                           Grid.Column="2"
+                           Grid.Row="3"
+                           />
+                    <Grid Grid.Column="0" Grid.RowSpan="5">
+                        <Grid.ColumnDefinitions>
+
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="1.1*"/>
+                            <RowDefinition Height="*"/>
+
+                        </Grid.RowDefinitions>
+                        <Rectangle Fill="White"  Grid.Row="0" />
+                        <Rectangle Fill="White"  Grid.Row="2" />
+                        <Rectangle Fill="White"  Grid.Row="4" />
+                        <Rectangle Fill="White"  Grid.Row="6" />
+                        <Rectangle Fill="White"  Grid.Row="8" />
+                        <Rectangle Fill="White"  Grid.Row="10" />
+                        <Rectangle Fill="White"  Grid.Row="12" />
+                        <Rectangle Fill="White"  Grid.Row="14" />
 
 
-                </Grid>
-                <Rectangle 
+                    </Grid>
+                    <Rectangle 
                     Fill="White"
                     Grid.Column="1"
                     Grid.Row="0"
                     Margin="10, 0, -8, 0"
                     />
+                </Grid>
+
+
             </Grid>
+        </Canvas>
 
-
-        </Grid>
-    </Canvas>
+    </Grid>
 
 </Window>
