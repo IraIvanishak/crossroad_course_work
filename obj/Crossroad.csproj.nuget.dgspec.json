@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\user\\Desktop\\CourseWork\\Crossroad\\Crossroad.csproj": {}
+    "C:\\Users\\user\\Desktop\\CourseWork\\git\\crossroad\\Crossroad.csproj": {}
   },
   "projects": {
-    "C:\\Users\\user\\Desktop\\CourseWork\\Crossroad\\Crossroad.csproj": {
+    "C:\\Users\\user\\Desktop\\CourseWork\\git\\crossroad\\Crossroad.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\user\\Desktop\\CourseWork\\Crossroad\\Crossroad.csproj",
+        "projectUniqueName": "C:\\Users\\user\\Desktop\\CourseWork\\git\\crossroad\\Crossroad.csproj",
         "projectName": "Crossroad",
-        "projectPath": "C:\\Users\\user\\Desktop\\CourseWork\\Crossroad\\Crossroad.csproj",
+        "projectPath": "C:\\Users\\user\\Desktop\\CourseWork\\git\\crossroad\\Crossroad.csproj",
         "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\user\\Desktop\\CourseWork\\Crossroad\\obj\\",
+        "outputPath": "C:\\Users\\user\\Desktop\\CourseWork\\git\\crossroad\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
