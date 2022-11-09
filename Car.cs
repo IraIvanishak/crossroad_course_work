@@ -42,7 +42,7 @@ namespace Crossroad
                 case CarDirections.OnRight: str += "R"; break;
             }
 
-            color = str;
+            //color = str;
 
             view.Fill = new ImageBrush(new BitmapImage(new
             Uri("C:\\Users\\user\\Desktop\\Crossroad\\Resources\\"+str+".png")));
@@ -202,7 +202,7 @@ namespace Crossroad
                                 }
                                 else
                                 {
-                                    int toNextYellow = InterfaceBuilder.GetRemainigTime();
+                                    int toNextYellow = Road.GetRemainigTime();
                                     if (delayTime > toNextYellow)
                                     {
                                         anStarted.Stop();

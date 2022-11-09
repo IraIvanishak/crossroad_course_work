@@ -11,11 +11,9 @@ namespace Crossroad
 {
     public class InterfaceBuilder : IInterfaceBuilder
     {
-        private static int TimeFromLasReset { set; get; } = 0;
         private bool Reset { set; get; } = false;
         private MainWindow Form { set; get; } = Application.Current.Windows[0] as MainWindow;
         private Modes Mode { set; get; } = Modes.Manual;
-        private Timer[] TimersSet { set; get; } = new Timer[TIMERS_COUNT];
 
         public InterfaceBuilder BuildCrosswalks()
         {
@@ -175,76 +173,7 @@ namespace Crossroad
 
         }
 
-        private void BuildLightMode()
-        {
-
-            for (int i = 0; i < 4; i++)
-                LightsSet[i].CurrentLight = Colors.Yellow;
-            Axis = Axes.Undef;
-
-
-            Timer startTimer = new();
-            Timer swapTimer = new();
-            swapTimer.Interval = TLTime;
-            swapTimer.Elapsed += (s, e) =>
-            {
-                Application.Current.Dispatcher.Invoke((Action)(() =>
-                {
-
-                    for (int i = 0; i < 4; i++)
-                    {
-                        LightsSet[i].swapColors();
-                    }
-                    if (LightsSet[0].CurrentLight == Colors.Green) Axis = Axes.Vertical; else Axis = Axes.Horizontal;
-                    TimeFromLasReset = ((int)DateTime.Now.Ticks);
-
-                }));
-
-            };
-
-            startTimer.Interval = YELLOW_TIME;
-            startTimer.Elapsed += (s, e) =>
-            {
-                Application.Current.Dispatcher.Invoke((Action)(() =>
-                {
-                    TimeFromLasReset = ((int)DateTime.Now.Ticks);
-                    swapTimer.Start();
-                    for (int i = 0; i < 4; i++)
-                    {
-                        if (i % 2 == 0) LightsSet[i].CurrentLight = Colors.Red;
-                        else LightsSet[i].CurrentLight = Colors.Green;
-                    }
-                    Axis = Axes.Horizontal;
-                    startTimer.Enabled = false;
-                }));
-
-
-            };
-
-
-            Timer yellowTimer = new();
-            yellowTimer.Elapsed += (s, e) =>
-            {
-
-                Application.Current.Dispatcher.Invoke((Action)(() =>
-                {
-                    for (int i = 0; i < 4; i++)
-                        LightsSet[i].CurrentLight = Colors.Yellow;
-                    Axis = Axes.Undef;
-
-
-                }));
-
-            };
-            yellowTimer.Interval = TLTime;
-            yellowTimer.Start();
-            startTimer.Start();
-
-            TimersSet[0] = swapTimer;
-            TimersSet[1] = startTimer;
-            TimersSet[2] = yellowTimer;
-
-        }
+       
         private void CarHandler(object sender, RoutedEventArgs e)
         {
             var x = sender as FrameworkElement;
@@ -341,7 +270,7 @@ namespace Crossroad
                             {
                                 if (timer != null && timer.Enabled) timer.Stop();
                             }
-                            BuildLightMode();
+                            Road.BuildLightMode();
                             startTimer.Enabled = false;
                         }));
 
@@ -364,10 +293,7 @@ namespace Crossroad
             }
 
         }
-        public static int GetRemainigTime()
-        {
-            return (int)TLTime - YELLOW_TIME - (((int)DateTime.Now.Ticks) - TimeFromLasReset) / 10000;
-        }
+
 
 
     }

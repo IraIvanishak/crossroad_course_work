@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using static Crossroad.RoadSizes;
 using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace Crossroad
 {
@@ -25,6 +26,8 @@ namespace Crossroad
         public static double PedestrianPeriod { set; get; } = 0;
         public static Timer CarTimer { set; get; } = new();
         public static Timer PedestrianTimer { set; get; } = new();
+        public static Timer[] TimersSet { set; get; } = new Timer[TIMERS_COUNT];
+        public static int TimeFromLasReset { set; get; } = 0;
 
         public static void Go()
         {
@@ -72,6 +75,81 @@ namespace Crossroad
                 car.transformGroup.Children.Clear();
                 car.locateOnRoad();
             }
+        }
+
+        public static void BuildLightMode()
+        {
+
+            for (int i = 0; i < 4; i++)
+                LightsSet[i].CurrentLight = Colors.Yellow;
+            Axis = Axes.Undef;
+
+
+            Timer startTimer = new();
+            Timer swapTimer = new();
+            swapTimer.Interval = TLTime;
+            swapTimer.Elapsed += (s, e) =>
+            {
+                Application.Current.Dispatcher.Invoke((Action)(() =>
+                {
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        LightsSet[i].swapColors();
+                    }
+                    if (LightsSet[0].CurrentLight == Colors.Green) Axis = Axes.Vertical; else Axis = Axes.Horizontal;
+                    TimeFromLasReset = ((int)DateTime.Now.Ticks);
+
+                }));
+
+            };
+
+            startTimer.Interval = YELLOW_TIME;
+            startTimer.Elapsed += (s, e) =>
+            {
+                Application.Current.Dispatcher.Invoke((Action)(() =>
+                {
+                    TimeFromLasReset = ((int)DateTime.Now.Ticks);
+                    swapTimer.Start();
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (i % 2 == 0) LightsSet[i].CurrentLight = Colors.Red;
+                        else LightsSet[i].CurrentLight = Colors.Green;
+                    }
+                    Axis = Axes.Horizontal;
+                    startTimer.Enabled = false;
+                }));
+
+
+            };
+
+
+            Timer yellowTimer = new();
+            yellowTimer.Elapsed += (s, e) =>
+            {
+
+                Application.Current.Dispatcher.Invoke((Action)(() =>
+                {
+                    for (int i = 0; i < 4; i++)
+                        LightsSet[i].CurrentLight = Colors.Yellow;
+                    Axis = Axes.Undef;
+
+
+                }));
+
+            };
+            yellowTimer.Interval = TLTime;
+            yellowTimer.Start();
+            startTimer.Start();
+
+            TimersSet[0] = swapTimer;
+            TimersSet[1] = startTimer;
+            TimersSet[2] = yellowTimer;
+
+        }
+        public static int GetRemainigTime()
+        {
+            return (int)TLTime - YELLOW_TIME - (((int)DateTime.Now.Ticks) - TimeFromLasReset) / 10000;
         }
         public static RoadParts GetOppositeRoad(int r)
         {

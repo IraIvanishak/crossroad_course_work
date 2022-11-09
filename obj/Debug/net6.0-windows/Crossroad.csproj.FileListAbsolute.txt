@@ -49,3 +49,17 @@ C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\Crossroa
 C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\Crossroad.dll
 C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\refint\Crossroad.dll
 C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\Crossroad.pdb
+C:\Users\user\Desktop\CourseWork\git\crossroad\bin\Debug\net6.0-windows\Crossroad.exe
+C:\Users\user\Desktop\CourseWork\git\crossroad\bin\Debug\net6.0-windows\Resources\carBlue.png
+C:\Users\user\Desktop\CourseWork\git\crossroad\bin\Debug\net6.0-windows\Crossroad.deps.json
+C:\Users\user\Desktop\CourseWork\git\crossroad\bin\Debug\net6.0-windows\Crossroad.runtimeconfig.json
+C:\Users\user\Desktop\CourseWork\git\crossroad\bin\Debug\net6.0-windows\Crossroad.dll
+C:\Users\user\Desktop\CourseWork\git\crossroad\bin\Debug\net6.0-windows\Crossroad.pdb
+C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\MainWindow.baml
+C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\Crossroad.g.resources
+C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\Crossroad.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\Crossroad.AssemblyInfoInputs.cache
+C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\Crossroad.AssemblyInfo.cs
+C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\Crossroad.csproj.CoreCompileInputs.cache
+C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\Crossroad.genruntimeconfig.cache
+C:\Users\user\Desktop\CourseWork\git\crossroad\obj\Debug\net6.0-windows\ref\Crossroad.dll
