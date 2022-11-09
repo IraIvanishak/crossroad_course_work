@@ -25,7 +25,7 @@ namespace Crossroad
         public const double CROSSWALK_WIDTH = 56;
         public const double CROSSWALK_ZEBRA_WIDTH = 36;
         public const double CROSSWALK_ZEBRA_LINE_WIDTH = 13;
-        public const int TRAFFIC_LIGHT_DEF_TIME = 30000;
+        public const int TRAFFIC_LIGHT_DEF_TIME = 10000;
         public const int UPDATE_TIME = 1000;
         public const int YELLOW_TIME = 3000;
         public const int MARGIN_SMAL = 10;
@@ -43,10 +43,7 @@ namespace Crossroad
         public const int DIRECTIONS_COUNT = 3;
         public const int PEDESTRIAN_DIRECTIONS_COUNT = 2;
         public const int TIMERS_COUNT = 3;
-
-
-
-
+        public const int MAX_LANE_COUNT = 2;
 
     }
 }

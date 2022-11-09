@@ -7,12 +7,12 @@ using System.Windows.Controls;
 using static Crossroad.RoadSizes;
 using System.Collections.Generic;
 using System.Windows.Media;
+using System.Diagnostics;
 
 namespace Crossroad
 {
     public static class Road
     {
-
         public static Canvas[] LanesSet { set; get; } = new Canvas[ROADS_COUNT];
         public static Crosswalk[] CrosswalkSet { set; get; } = new Crosswalk[ROADS_COUNT];
         public static TrafficLight[] LightsSet { set; get; } = new TrafficLight[ROADS_COUNT];
@@ -20,23 +20,26 @@ namespace Crossroad
         public static Axes Axis { set; get; } = Axes.Horizontal; 
         public static int Lane { set; get; } = 1;
         public static double LaneWidth { set; get; } = GEWAY_ONE_LANE_WIDTH;
-        public static double TLTime { set; get; } = TRAFFIC_LIGHT_DEF_TIME;
+        public static bool Reset { set; get; } = false;
+        public static bool ResetAuto { set; get; } = false;
+
 
         public static double CarPeriod { set; get; } = 0;
         public static double PedestrianPeriod { set; get; } = 0;
+        public static Timer GoTimer { set; get; } = new();
         public static Timer CarTimer { set; get; } = new();
         public static Timer PedestrianTimer { set; get; } = new();
-        public static Timer[] TimersSet { set; get; } = new Timer[TIMERS_COUNT];
-        public static int TimeFromLasReset { set; get; } = 0;
+
 
         public static void Go()
         {
-            Timer GoTimer = new();
-            GoTimer.Interval = UPDATE_TIME;
+            GoTimer.Interval = UPDATE_TIME; 
+            if(!Reset) 
             GoTimer.Elapsed += (s, e) =>
             {
                 Application.Current.Dispatcher.BeginInvoke(() =>
                 {
+                    Debug.WriteLine("go timer " + DateTime.Now.Second);
                     var workPedestrians = CrosswalkSet
                         .Where(cs => cs.locAxis == Axis);
 
@@ -64,11 +67,10 @@ namespace Crossroad
                 });
             };
             GoTimer.Start();
-
         }
         public static void UpdateCars()
         {
-            Car.EndPoint = new uint[ROADS_COUNT, 2];           
+            Car.EndPoint = new uint[ROADS_COUNT, MAX_LANE_COUNT];           
             foreach (Car car in Cars)
             {
                 LanesSet[(int)car.RoadPart].Children.Remove(car.view);
@@ -76,81 +78,8 @@ namespace Crossroad
                 car.locateOnRoad();
             }
         }
-
-        public static void BuildLightMode()
-        {
-
-            for (int i = 0; i < 4; i++)
-                LightsSet[i].CurrentLight = Colors.Yellow;
-            Axis = Axes.Undef;
-
-
-            Timer startTimer = new();
-            Timer swapTimer = new();
-            swapTimer.Interval = TLTime;
-            swapTimer.Elapsed += (s, e) =>
-            {
-                Application.Current.Dispatcher.Invoke((Action)(() =>
-                {
-
-                    for (int i = 0; i < 4; i++)
-                    {
-                        LightsSet[i].swapColors();
-                    }
-                    if (LightsSet[0].CurrentLight == Colors.Green) Axis = Axes.Vertical; else Axis = Axes.Horizontal;
-                    TimeFromLasReset = ((int)DateTime.Now.Ticks);
-
-                }));
-
-            };
-
-            startTimer.Interval = YELLOW_TIME;
-            startTimer.Elapsed += (s, e) =>
-            {
-                Application.Current.Dispatcher.Invoke((Action)(() =>
-                {
-                    TimeFromLasReset = ((int)DateTime.Now.Ticks);
-                    swapTimer.Start();
-                    for (int i = 0; i < 4; i++)
-                    {
-                        if (i % 2 == 0) LightsSet[i].CurrentLight = Colors.Red;
-                        else LightsSet[i].CurrentLight = Colors.Green;
-                    }
-                    Axis = Axes.Horizontal;
-                    startTimer.Enabled = false;
-                }));
-
-
-            };
-
-
-            Timer yellowTimer = new();
-            yellowTimer.Elapsed += (s, e) =>
-            {
-
-                Application.Current.Dispatcher.Invoke((Action)(() =>
-                {
-                    for (int i = 0; i < 4; i++)
-                        LightsSet[i].CurrentLight = Colors.Yellow;
-                    Axis = Axes.Undef;
-
-
-                }));
-
-            };
-            yellowTimer.Interval = TLTime;
-            yellowTimer.Start();
-            startTimer.Start();
-
-            TimersSet[0] = swapTimer;
-            TimersSet[1] = startTimer;
-            TimersSet[2] = yellowTimer;
-
-        }
-        public static int GetRemainigTime()
-        {
-            return (int)TLTime - YELLOW_TIME - (((int)DateTime.Now.Ticks) - TimeFromLasReset) / 10000;
-        }
+       
+        
         public static RoadParts GetOppositeRoad(int r)
         {
             return (RoadParts)((r + 2) % ROADS_COUNT);
@@ -167,6 +96,14 @@ namespace Crossroad
             Cars.Add(car);
 
             CarTimer.Interval = CarPeriod;
+
+            if (CarTimer.Enabled)
+            {
+                CarTimer.Stop();
+                PedestrianTimer.Stop();
+            }
+
+            if (!ResetAuto) 
             CarTimer.Elapsed += (s,e) =>
             {
 
@@ -199,6 +136,8 @@ namespace Crossroad
             CarTimer.Start();
 
             PedestrianTimer.Interval = PedestrianPeriod;
+
+            if(!ResetAuto) 
             PedestrianTimer.Elapsed += (s, e) =>
             {
                 Application.Current.Dispatcher.Invoke(() =>

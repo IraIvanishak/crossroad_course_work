@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,8 +12,7 @@ namespace Crossroad
 {
     public class InterfaceBuilder : IInterfaceBuilder
     {
-        private bool Reset { set; get; } = false;
-        private MainWindow Form { set; get; } = Application.Current.Windows[0] as MainWindow;
+        private MainWindow Form { set; get; } = (MainWindow)Application.Current.Windows[0];
         private Modes Mode { set; get; } = Modes.Manual;
 
         public InterfaceBuilder BuildCrosswalks()
@@ -103,6 +103,7 @@ namespace Crossroad
 
             Form.auto.Click += (s, e) =>
             {
+                
                 Mode = Modes.Auto;
                 Form.control.Visibility = Visibility.Visible;
                 foreach (var panel in bPanel)
@@ -117,6 +118,13 @@ namespace Crossroad
 
             Form.manual.Click += (s, e) =>
             {
+                if (PedestrianTimer.Enabled)
+                {
+                    PedestrianTimer.Stop();
+                    CarTimer.Stop();
+                    TrafficLight.TLTime = TRAFFIC_LIGHT_DEF_TIME;
+                }
+
                 Mode = Modes.Manual;
                 Form.control.Visibility = Visibility.Collapsed;
                 foreach (var panel in bPanel)
@@ -127,6 +135,11 @@ namespace Crossroad
                 {
                     panel.Visibility = Visibility.Visible;
                 }
+            };
+
+            Form.stop.Click += (s, e) =>
+            {
+                StopMovement();
             };
 
             return this;
@@ -172,8 +185,17 @@ namespace Crossroad
             return this;
 
         }
+        public void StopMovement()
+        {
+            GoTimer.Enabled = false;
+            PedestrianTimer.Enabled = false;
+            CarTimer.Enabled = false;
+            TrafficLight.swapTimer.Enabled = false;
+            TrafficLight.yellowTimer.Enabled = false;
+            TrafficLight.TimeFromLasReset = 0;
 
-       
+        }
+
         private void CarHandler(object sender, RoutedEventArgs e)
         {
             var x = sender as FrameworkElement;
@@ -249,52 +271,19 @@ namespace Crossroad
         }
         private void GoHandler(object sender, RoutedEventArgs e)
         {
-
             if (Mode == Modes.Auto)
             {
                 CarPeriod = Convert.ToDouble(Form.carF.Text) * 1000;
                 PedestrianPeriod = Convert.ToDouble(Form.pedestrianF.Text) * 1000;
-
-                if (Reset)
-                {
-                    var startTimer = new Timer();
-                    startTimer.Interval = Math.Abs(GetRemainigTime());
-                    startTimer.Elapsed += (s, e) =>
-                    {
-                        Application.Current.Dispatcher.Invoke((Action)(() =>
-                        {
-                            TLTime = Convert.ToDouble(Form.lightF.Text) * 1000;
-                            CarTimer.Interval = CarPeriod;
-                            PedestrianTimer.Interval = PedestrianPeriod;
-                            foreach (var timer in TimersSet)
-                            {
-                                if (timer != null && timer.Enabled) timer.Stop();
-                            }
-                            Road.BuildLightMode();
-                            startTimer.Enabled = false;
-                        }));
-
-                    };
-                    startTimer.Enabled = true;
-                }
-                else
-                {
-                    TLTime = Convert.ToDouble(Form.lightF.Text) * 1000;
-                    GenerateTraffic();
-                }
+                TrafficLight.TLTime = Convert.ToInt32(Form.lightF.Text) * 1000;
+                GenerateTraffic();
+                if (Reset) ResetAuto = true;
             }
-
-            if (!Reset)
-            {
-                Reset = true;
-                Go();
-                BuildLightMode();
-
-            }
+            Go();
+            TrafficLight.BuildLightMode();
+            if(!Reset) Reset = true;
 
         }
-
-
 
     }
 }

@@ -202,7 +202,7 @@ namespace Crossroad
                                 }
                                 else
                                 {
-                                    int toNextYellow = Road.GetRemainigTime();
+                                    int toNextYellow = TrafficLight.GetRemainigTime();
                                     if (delayTime > toNextYellow)
                                     {
                                         anStarted.Stop();

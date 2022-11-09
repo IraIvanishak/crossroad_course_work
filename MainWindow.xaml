@@ -22,6 +22,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <Label Margin="5, -5" Content="Панель керування" FontFamily="Roboto Black" Foreground="#FF5E5E5E" FontSize="14" FontWeight="Normal"/>
 
@@ -208,6 +209,21 @@
                     Name="go"
                     Margin="0,10"
                     Content="Розпочати"
+                    Height="40" FontFamily="Roboto Medium" FontSize="16" BorderBrush="{x:Null}" Foreground="White" Background="Gray">
+                <Button.Resources>
+                    <Style TargetType="{x:Type Border}">
+                        <Setter Property="CornerRadius" Value="15"/>
+                    </Style>
+                </Button.Resources>
+                <Button.Effect>
+                    <DropShadowEffect BlurRadius="15" Opacity="0.08" Direction="300"/>
+                </Button.Effect>
+
+            </Button>
+            <Button Grid.Row="4" 
+                    Name="stop"
+                    Margin="0,10"
+                    Content="Зупинити"
                     Height="40" FontFamily="Roboto Medium" FontSize="16" BorderBrush="{x:Null}" Foreground="White" Background="Gray">
                 <Button.Resources>
                     <Style TargetType="{x:Type Border}">
