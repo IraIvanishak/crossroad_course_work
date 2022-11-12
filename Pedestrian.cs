@@ -31,7 +31,7 @@ namespace Crossroad
                 transformGroup.Children.Add(r);
             }
             else Canvas.SetRight(view, -1 * RoadSizes.MARGIN_BIG);
-            Road.CrosswalkSet[(int)road].crosswalkFild.Children.Add(view);
+            Road.CrosswalkSet[(int)road].CrosswalkFild.Children.Add(view);
         }
 
         private bool currA { get; set; } = false;
@@ -75,7 +75,7 @@ namespace Crossroad
 
             });
             goTimer.Start();
-            if (Direction == PedestrianDirections.Backward) Road.CrosswalkSet[(int)RoadPart].isFree = false;
+            if (Direction == PedestrianDirections.Backward) Road.CrosswalkSet[(int)RoadPart].IsFree = false;
             bool ready = false;
 
             System.Timers.Timer free = new();
@@ -86,13 +86,13 @@ namespace Crossroad
                 {
                     if (Direction == PedestrianDirections.Backward||ready)
                     {
-                        Road.CrosswalkSet[(int)RoadPart].isFree = true;
+                        Road.CrosswalkSet[(int)RoadPart].IsFree = true;
                         free.Stop();
                     }
                     else
                     {
                         ready = true;
-                        Road.CrosswalkSet[(int)RoadPart].isFree = false;
+                        Road.CrosswalkSet[(int)RoadPart].IsFree = false;
                     }
 
                 }));

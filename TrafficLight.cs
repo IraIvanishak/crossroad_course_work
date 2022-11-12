@@ -14,7 +14,7 @@ namespace Crossroad
     {
         public TrafficLight()
         {
-            setView();
+            SetView();
         }
         public static int TLTime { set; get; } = TRAFFIC_LIGHT_DEF_TIME;
         public Grid TLight { set; get; } = new();
@@ -23,7 +23,11 @@ namespace Crossroad
 
         private Color currentLight;
         public Color CurrentLight {
-            get    {  return currentLight;  }
+
+            get    
+            {
+                return currentLight; 
+            }
             set
             {
                 currentLight = value;
@@ -36,9 +40,7 @@ namespace Crossroad
                 }
                 if (index!=1) PrevLight = value;
 
-
-
-                Application.Current.Dispatcher.Invoke((Action)(() =>
+                Application.Current.Dispatcher.Invoke(() =>
                 {
                     for (int i = 0; i < 3; i++)
                     {
@@ -46,24 +48,24 @@ namespace Crossroad
                     }
                     TLight.Children.Cast<Ellipse>().ElementAt(index).Fill = new SolidColorBrush(value);
 
-                }));
-
-
+                });
             }
         }
-        public static Timer swapTimer { set; get; } = new();
-        public static Timer startTimer { set; get; } = new();
-        public static Timer yellowTimer { set; get; } = new();
-        public void swapColors()
+        public static Timer SwapTimer { set; get; } = new();
+        public static Timer StartTimer { set; get; } = new();
+        public static Timer YellowTimer { set; get; } = new();
+
+        public void SwapColors()
         {
-            if (PrevLight == Colors.Green) CurrentLight = Colors.Red;
+            if (PrevLight == Colors.Green) 
+                CurrentLight = Colors.Red;
             else CurrentLight = Colors.Green;
         }
-        public void setView()
+        public void SetView()
         {
             TLight = new Grid()
             {
-                Width = RoadSizes.LIGHT_SIZE,
+                Width = LIGHT_SIZE,
                 Background = new SolidColorBrush(Colors.DarkGray),
                 Margin = new Thickness(0, 10, 0, 0),
             };       
@@ -72,21 +74,19 @@ namespace Crossroad
             {
                 RowDefinition gridRow = new RowDefinition()
                 {
-                    Height = new GridLength(RoadSizes.LIGHT_SIZE)
+                    Height = new GridLength(LIGHT_SIZE)
                 };
                
                 TLight.RowDefinitions.Add(gridRow);
                 Ellipse circle = new Ellipse()
                 {
-                    Width = RoadSizes.LIGHT_SIZE * RoadSizes.LIGHT_SIZE_COEF,
-                    Height = RoadSizes.LIGHT_SIZE * RoadSizes.LIGHT_SIZE_COEF,
+                    Width = LIGHT_SIZE * LIGHT_SIZE_COEF,
+                    Height = LIGHT_SIZE * LIGHT_SIZE_COEF,
                     Fill = new SolidColorBrush(Colors.Gray),
                  };
                 Grid.SetRow(circle, i);
                 TLight.Children.Add(circle);
             }
-
-
         }
         public static int GetRemainigTime()
         {
@@ -95,22 +95,22 @@ namespace Crossroad
 
         public static void BuildLightMode()
         {
-            if (swapTimer.Enabled)
+            if (SwapTimer.Enabled)
             {
-                startTimer.Stop();
-                swapTimer.Stop();
-                yellowTimer.Stop();
+                StartTimer.Stop();
+                SwapTimer.Stop();
+                YellowTimer.Stop();
             }
             for (int i = 0; i < ROADS_COUNT; i++)
                 Road.LightsSet[i].CurrentLight = Colors.Yellow;
             Road.Axis = Axes.Undef;
 
-            swapTimer.Interval = TLTime;
-            yellowTimer.Interval = TLTime;
+            SwapTimer.Interval = TLTime;
+            YellowTimer.Interval = TLTime;
 
             if (!Road.Reset)
             {
-                swapTimer.Elapsed += (s, e) =>
+                SwapTimer.Elapsed += (s, e) =>
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -118,7 +118,7 @@ namespace Crossroad
 
                         for (int i = 0; i < ROADS_COUNT; i++)
                         {
-                            Road.LightsSet[i].swapColors();
+                            Road.LightsSet[i].SwapColors();
                         }
 
                         if (Road.LightsSet[0].CurrentLight == Colors.Green)
@@ -128,9 +128,9 @@ namespace Crossroad
 
                 };
 
-                startTimer.Interval = YELLOW_TIME;
+                StartTimer.Interval = YELLOW_TIME;
 
-                startTimer.Elapsed += (s, e) =>
+                StartTimer.Elapsed += (s, e) =>
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -143,24 +143,24 @@ namespace Crossroad
                         }
                         Road.Axis = Axes.Horizontal;
 
-                        swapTimer.Start();
-                        startTimer.Stop();
+                        SwapTimer.Start();
+                        StartTimer.Stop();
                     });
                 };
 
-                yellowTimer.Elapsed += (s, e) =>
+                YellowTimer.Elapsed += (s, e) =>
                 {
-                    Application.Current.Dispatcher.Invoke((Action)(() =>
+                    Application.Current.Dispatcher.Invoke(() =>
                     {
                         for (int i = 0; i < ROADS_COUNT; i++)
                             Road.LightsSet[i].CurrentLight = Colors.Yellow;
                         Road.Axis = Axes.Undef;
-                    }));
+                    });
                 };
             }
 
-            yellowTimer.Start();
-            startTimer.Start();
+            YellowTimer.Start();
+            StartTimer.Start();
         }
 
     }

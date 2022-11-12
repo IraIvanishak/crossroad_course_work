@@ -20,8 +20,9 @@ namespace Crossroad
         public static Axes Axis { set; get; } = Axes.Horizontal; 
         public static int Lane { set; get; } = 1;
         public static double LaneWidth { set; get; } = GEWAY_ONE_LANE_WIDTH;
+        public static bool GenerationStarted { set; get; } = false;
         public static bool Reset { set; get; } = false;
-        public static bool ResetAuto { set; get; } = false;
+
 
 
         public static double CarPeriod { set; get; } = 0;
@@ -39,13 +40,12 @@ namespace Crossroad
             {
                 Application.Current.Dispatcher.BeginInvoke(() =>
                 {
-                    Debug.WriteLine("go timer " + DateTime.Now.Second);
+                   // Debug.WriteLine("go timer " + DateTime.Now.Second);
                     var workPedestrians = CrosswalkSet
-                        .Where(cs => cs.locAxis == Axis);
+                        .Where(cs => cs.LocAxis == Axis);
 
                     foreach (var p in workPedestrians)
-                        if (p.Pedestrians.Count != 0) p.go();
-
+                        if (p.Pedestrians.Count != 0) p.Go();
 
                     var workCars = Cars
                         .Where(c =>
@@ -55,14 +55,7 @@ namespace Crossroad
 
                     foreach (var c in workCars)
                     {
-                        c.move();
-                        var currentLaneCars = Cars
-                        .Where(a =>
-                               a.RoadPart == c.RoadPart
-                               && a.InLane == c.InLane);
-
-                        foreach (var a in currentLaneCars)
-                            a.getCloser();
+                        c.PrepareToMove();
                     }
                 });
             };
@@ -73,9 +66,10 @@ namespace Crossroad
             Car.EndPoint = new uint[ROADS_COUNT, MAX_LANE_COUNT];           
             foreach (Car car in Cars)
             {
-                LanesSet[(int)car.RoadPart].Children.Remove(car.view);
-                car.transformGroup.Children.Clear();
-                car.locateOnRoad();
+                LanesSet[(int)car.RoadPart].Children.Remove(car.View);
+                car.Offset = 0;
+                car.TransformGroup.Children.Clear();
+                car.LocateOnRoad();
             }
         }
        
@@ -91,8 +85,8 @@ namespace Crossroad
         public static void GenerateTraffic()
         {
             var random = new Random();
-            var car = new Car((RoadParts)random.Next(ROADS_COUNT-1),
-                (CarDirections)random.Next(DIRECTIONS_COUNT-1));
+            var car = new Car((RoadParts)random.Next(ROADS_COUNT),
+                (Directions)random.Next(DIRECTIONS_COUNT));
             Cars.Add(car);
 
             CarTimer.Interval = CarPeriod;
@@ -103,29 +97,29 @@ namespace Crossroad
                 PedestrianTimer.Stop();
             }
 
-            if (!ResetAuto) 
+            if (!GenerationStarted) 
             CarTimer.Elapsed += (s,e) =>
             {
 
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     var activeCars = Car.InMovement.Where(c =>
-                        c.CarDirection == CarDirections.OnLeft);
+                        c.Direction == Directions.OnLeft);
 
                     var availableRoads = new List<RoadParts>()
                             { RoadParts.South,  RoadParts.West, RoadParts.North, RoadParts.East };
 
-                    if (activeCars is not null)
-                    {
-                        foreach (var activeCar in activeCars)
-                        {
-                            availableRoads.Remove(GetOppositeRoad((int)activeCar.RoadPart));
-                        }
-                    }
+                    //if (activeCars is not null)
+                    //{
+                    //    foreach (var activeCar in activeCars)
+                    //    {
+                    //        availableRoads.Remove(GetOppositeRoad((int)activeCar.RoadPart));
+                    //    }
+                    //}
 
                     var r = random.Next(availableRoads.Count);
                     var car = new Car(availableRoads[r],
-                        (CarDirections)random.Next(DIRECTIONS_COUNT - 1));
+                        (Directions)random.Next(DIRECTIONS_COUNT));
 
                     Cars.Add(car);
 
@@ -137,7 +131,7 @@ namespace Crossroad
 
             PedestrianTimer.Interval = PedestrianPeriod;
 
-            if(!ResetAuto) 
+            if(!GenerationStarted) 
             PedestrianTimer.Elapsed += (s, e) =>
             {
                 Application.Current.Dispatcher.Invoke(() =>
@@ -166,7 +160,7 @@ namespace Crossroad
                                 availableDirections.Remove(pedestrian.Direction);
 
                             var d = random.Next(availableDirections.Count);
-                            CrosswalkSet[availableRoads[r]].addPedestrian(availableDirections[d]);
+                            CrosswalkSet[availableRoads[r]].AddPedestrian(availableDirections[d]);
                     }
                 });
             };

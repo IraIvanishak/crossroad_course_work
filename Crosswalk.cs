@@ -10,41 +10,44 @@ namespace Crossroad
         public Crosswalk(RoadParts road)
         {
             RoadPart = road;
-            locAxis = (int)road % 2 == 0 ? Axes.Horizontal : Axes.Vertical;
-            crosswalkFild = new()
+            LocAxis = (int)road % 2 == 0 ? Axes.Horizontal : Axes.Vertical;
+            CrosswalkFild = new()
             {
                 Width = RoadSizes.ROAD_WIDTH,
                 Height = RoadSizes.CROSSWALK_ZEBRA_WIDTH,
             };
-
         }
 
-        public Canvas crosswalkFild { set; get; } = new();
-        public Axes locAxis { set; get; } = Axes.Vertical;
+        public Canvas CrosswalkFild { set; get; } = new();
+        public Axes LocAxis { set; get; } = Axes.Vertical;
         public RoadParts RoadPart { set; get; } = 0;
         public ObservableCollection<Pedestrian> Pedestrians { set; get; } = new();
 
-        public void addPedestrian(object sender, RoutedEventArgs e)
+        public void AddPedestrian(object sender, RoutedEventArgs e)
         {
-            var dir = Canvas.GetRight((sender as Button)) == 0 ? PedestrianDirections.Forward : PedestrianDirections.Backward;
+            var dir = Canvas.GetRight((sender as Button)) == 0 ? 
+                PedestrianDirections.Forward 
+                : PedestrianDirections.Backward;
+
             var pedastrian = new Pedestrian(RoadPart, dir);
             Pedestrians.Add(pedastrian);
         }
 
-        public void addPedestrian(PedestrianDirections dir)
+        public void AddPedestrian(PedestrianDirections dir)
         {
             var pedastrian = new Pedestrian(RoadPart, dir);
             Pedestrians.Add(pedastrian);
         }
-        public void go()
+        public void Go()
         {
-            Pedestrians.ToList().ForEach(p =>
-            {
-                p.move();
-                Pedestrians.Remove(p);
-            });
-
+            Pedestrians
+                .ToList()
+                .ForEach(p =>
+                {
+                    p.move();
+                    Pedestrians.Remove(p);
+                });
         }
-        public bool isFree { set; get; } = true;
+        public bool IsFree { set; get; } = true;
     }
 }

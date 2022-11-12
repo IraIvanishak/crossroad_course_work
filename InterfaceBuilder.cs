@@ -20,8 +20,8 @@ namespace Crossroad
             for (int j = 0; j < 4; j++)
             {
                 var crosswalk = new Crosswalk((RoadParts)j);
-                Canvas.SetRight(crosswalk.crosswalkFild, 0);
-                LanesSet[j].Children.Add(crosswalk.crosswalkFild);
+                Canvas.SetRight(crosswalk.CrosswalkFild, 0);
+                LanesSet[j].Children.Add(crosswalk.CrosswalkFild);
                 CrosswalkSet[j] = crosswalk;
             }
 
@@ -84,12 +84,12 @@ namespace Crossroad
                 bPedPanel[j / 90] = bAddP1;
                 bPedPanel[j / 90 + 4] = bAddP2;
 
-                bAddP1.Click += new RoutedEventHandler(CrosswalkSet[j / 90].addPedestrian);
-                bAddP2.Click += new RoutedEventHandler(CrosswalkSet[j / 90].addPedestrian);
+                bAddP1.Click += new RoutedEventHandler(CrosswalkSet[j / 90].AddPedestrian);
+                bAddP2.Click += new RoutedEventHandler(CrosswalkSet[j / 90].AddPedestrian);
 
                 Canvas.SetRight(bAddP2, 0);
-                CrosswalkSet[j / 90].crosswalkFild.Children.Add(bAddP1);
-                CrosswalkSet[j / 90].crosswalkFild.Children.Add(bAddP2);
+                CrosswalkSet[j / 90].CrosswalkFild.Children.Add(bAddP1);
+                CrosswalkSet[j / 90].CrosswalkFild.Children.Add(bAddP2);
 
             }
 
@@ -118,11 +118,11 @@ namespace Crossroad
 
             Form.manual.Click += (s, e) =>
             {
-                if (PedestrianTimer.Enabled)
+
+                if (Reset)
                 {
-                    PedestrianTimer.Stop();
-                    CarTimer.Stop();
-                    TrafficLight.TLTime = TRAFFIC_LIGHT_DEF_TIME;
+                    StopMovement();
+                    TrafficLight.TLTime = TRAFFIC_LIGHT_DEF_TIME;                    
                 }
 
                 Mode = Modes.Manual;
@@ -190,8 +190,8 @@ namespace Crossroad
             GoTimer.Enabled = false;
             PedestrianTimer.Enabled = false;
             CarTimer.Enabled = false;
-            TrafficLight.swapTimer.Enabled = false;
-            TrafficLight.yellowTimer.Enabled = false;
+            TrafficLight.SwapTimer.Enabled = false;
+            TrafficLight.YellowTimer.Enabled = false;
             TrafficLight.TimeFromLasReset = 0;
 
         }
@@ -204,7 +204,7 @@ namespace Crossroad
             if (parent == null) return;
             var j = Convert.ToInt16(parent.Tag);
 
-            var car = new Car((RoadParts)j, (CarDirections)Convert.ToInt16(x.Tag));
+            var car = new Car((RoadParts)j, (Directions)Convert.ToInt16(x.Tag));
             Cars.Add(car);
             // Debug.WriteLine("created "+ car.RoadPart);
         }
@@ -277,7 +277,7 @@ namespace Crossroad
                 PedestrianPeriod = Convert.ToDouble(Form.pedestrianF.Text) * 1000;
                 TrafficLight.TLTime = Convert.ToInt32(Form.lightF.Text) * 1000;
                 GenerateTraffic();
-                if (Reset) ResetAuto = true;
+                if (Reset) GenerationStarted = true;
             }
             Go();
             TrafficLight.BuildLightMode();

@@ -32,7 +32,7 @@ public enum RoadParts
     East,
 }
 
-public enum CarDirections
+public enum Directions
 {
     OnLeft,
     Straight,

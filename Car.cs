@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using System.Windows;
@@ -9,24 +10,19 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using static Crossroad.RoadSizes;
-
+using System.Diagnostics;
 
 namespace Crossroad
 {
     public class Car
     {
-        public Car(RoadParts roadPart, CarDirections carDirection)
+        public Car(RoadParts roadPart, Directions carDirection)
         {
             RoadPart = roadPart;
-            CarDirection = carDirection;
+            Direction = carDirection;
 
             var random = new Random();
-            int i;
-            do { 
-                i = random.Next(3);
-            }
-            while (i == PrevColor);
-            PrevColor = i;
+            int i = random.Next(DIRECTIONS_COUNT);
 
             string str ="car";
             switch (i)
@@ -38,286 +34,414 @@ namespace Crossroad
 
             switch (carDirection)
             {
-                case CarDirections.OnLeft: str += "L"; break;
-                case CarDirections.OnRight: str += "R"; break;
+                case Directions.OnLeft: str += "L"; break;
+                case Directions.OnRight: str += "R"; break;
             }
 
-            //color = str;
+            View.Fill = new ImageBrush(new BitmapImage(new
+            Uri("C:\\Users\\user\\Desktop\\Crossroad\\Resources\\" + str + ".png")));
 
-            view.Fill = new ImageBrush(new BitmapImage(new
-            Uri("C:\\Users\\user\\Desktop\\Crossroad\\Resources\\"+str+".png")));
-
-            view.RenderTransform = transformGroup;
-            locateOnRoad();
+            View.RenderTransform = TransformGroup;
+            LocateOnRoad();
 
         }
 
-        public Rectangle view { get; set; } = new();
-        public TransformGroup transformGroup { get; set; } = new();
-
+        public Rectangle View { get; set; } = new();
+        public TransformGroup TransformGroup { get; set; } = new();
 
         public RoadParts RoadPart { get; set; } = 0;
+        public Directions Direction { get; set; } = 0;
         public uint QueueIndex { get; set; } = 0;
-        public CarDirections CarDirection { get; set; } = 0;
         public uint InLane { get; set; } = 0;
         public double Offset { get; set; } = 0;
         public bool InDelay { get; set; } = false;
+        public int PedestrianDelay { get; set; } = 0;
 
-        public void turnLeft()
+        public void TurnLeft()
         {
-            var dest2 = -1 * GEWAY_ONE_LANE_WIDTH;
-            var t2 = new TranslateTransform();
-            transformGroup.Children.Add(t2);
-            var db3 = new DoubleAnimation(0, dest2, TimeSpan.FromSeconds(Road.Lane == 2 ? SHORT_DUR : SHORT_SHORT_DUR));
-            int count2 = 0;
-            db3.Completed += (s, e) => {
+            InDangerZone.Add(this);
+           //  View.Fill = new SolidColorBrush(Colors.Red);
 
-                count2 = Road.CrosswalkSet[((int)CarDirection + (int)RoadPart + 1) % 4].isFree ? 0 : 1;
-                TimeSpan? time = TimeSpan.FromSeconds(count2);
-                var dest3 =  - 1 * (FILD / 2 + ROAD_CENTRE + MARGIN_SMAL);
-                var t3 = new TranslateTransform();
-                transformGroup.Children.Add(t3);
+            var tt = new TranslateTransform();
+            TransformGroup.Children.Add(tt);
 
-                var db4 = new DoubleAnimation(0, dest3, TimeSpan.FromSeconds(Road.Lane == 2 ? LONG_LONG_DUR : LONG_DUR));
-                db4.BeginTime = time;
+            var destination = -1 * GEWAY_ONE_LANE_WIDTH;
+            var animaton = new DoubleAnimation(0, destination,
+                TimeSpan.FromSeconds(Road.Lane * SHORT_SHORT_DUR));
 
-                t3.BeginAnimation(TranslateTransform.XProperty, db4);
+            animaton.Completed += (s, e) => {
 
-                System.Timers.Timer anStarted = new();
-                anStarted.Elapsed += new ElapsedEventHandler((object? source, ElapsedEventArgs e) =>
+                var lastTT = new TranslateTransform();
+                TransformGroup.Children.Add(lastTT);
+
+                bool stopBeforeCrosswalk = !Road.CrosswalkSet[(int)Road.GetFutureRoad((int)Direction, (int)RoadPart)].IsFree;
+                TimeSpan? time = TimeSpan.Zero;
+                if (stopBeforeCrosswalk) time = TimeSpan.FromSeconds(1);
+
+                var lastRoadPart =  - 1 * (FILD / 2 + ROAD_CENTRE + MARGIN_SMAL);
+                var lastPartAnimation = new DoubleAnimation(0, lastRoadPart, TimeSpan.FromSeconds(LONG_DUR*Road.Lane));
+                lastPartAnimation.BeginTime = time;
+                lastTT.BeginAnimation(TranslateTransform.XProperty, lastPartAnimation);
+
+                var anStarted = new Timer();
+                anStarted.Elapsed += ( s, e ) =>
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        setQueue();
+                        SetQueue();
+                      //  View.Fill = new SolidColorBrush(Colors.Green);
+
                         anStarted.Stop();
-
                     });
+                };
 
-                });
                 anStarted.Interval = time.Value.TotalMilliseconds+1;
                 anStarted.Start();
             };
 
-            t2.BeginAnimation(TranslateTransform.XProperty, db3);
-
-
+            tt.BeginAnimation(TranslateTransform.XProperty, animaton);
         }
 
-        public void turnRight()
+        public void TurnRight()
         {
- 
-            int count2 = Road.CrosswalkSet[((int)CarDirection + (int)RoadPart + 1) % 4].isFree ? 0 : 1;             
-            TimeSpan? time  = TimeSpan.FromSeconds(count2);
+            var TT = new TranslateTransform();
+            TransformGroup.Children.Add(TT);
 
-            var dest3 =  (FILD / 2 + ROAD_CENTRE + MARGIN_SMAL);
-            var t3 = new TranslateTransform();
-            transformGroup.Children.Add(t3);
-
-            var db4 = new DoubleAnimation(0, dest3, TimeSpan.FromSeconds(Road.Lane == 2 ? LONG_DUR : SHORT_DUR));
-            db4.BeginTime = time;
-
-            t3.BeginAnimation(TranslateTransform.XProperty, db4);
-            System.Timers.Timer anStarted = new();
-            anStarted.Elapsed += new ElapsedEventHandler((object? source, ElapsedEventArgs e) =>
+            bool stopBeforeCrosswalk = !Road.CrosswalkSet[(int)Road.GetFutureRoad((int)Direction, (int)RoadPart)].IsFree;
+            TimeSpan? time = TimeSpan.Zero;
+            if (stopBeforeCrosswalk)
             {
+                time = TimeSpan.FromSeconds(1);
+                var movingCar = InMovement
+                    .Where(c => c.RoadPart == Road.GetOppositeRoad((int)RoadPart))
+                    .FirstOrDefault();
+                if (movingCar is not null)
+                    movingCar.PedestrianDelay++;
+            }
 
+            var lastRoadPart =  (FILD / 2 + ROAD_CENTRE + MARGIN_SMAL);
+            var animation = new DoubleAnimation(0, lastRoadPart, TimeSpan.FromSeconds(Road.Lane * SHORT_DUR));
+            animation.BeginTime = time;
+
+            TT.BeginAnimation(TranslateTransform.XProperty, animation);
+            var anStarted = new Timer();
+            anStarted.Elapsed += (s, e) =>
+            {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    setQueue();
+                    SetQueue();
                     anStarted.Stop();
                 });
-
-            });
+            };
             anStarted.Interval = time.Value.TotalMilliseconds+1;
             anStarted.Start();
         }
 
-        public void move()
+        public void Move()
         {
-            Road.Cars.Remove(this);
             InMovement.Add(this);
-            if (CarDirection == CarDirections.Straight)
+            var currentLaneCars = Road.Cars
+               .Where(a =>
+               a.RoadPart == RoadPart
+               && a.InLane == InLane);
+
+            foreach (var a in currentLaneCars)
+                a.GetCloser();
+
+           // view.Fill = new SolidColorBrush(Colors.Red);
+
+            if (Direction == Directions.Straight)
             {
-                var t = new TranslateTransform();
-                transformGroup.Children.Add(t);
-
-                var dest = -1 * FILD;
-                var db = new DoubleAnimation(0, dest, TimeSpan.FromSeconds(Road.Lane == 2 ? LONG_LONG_LONG_DUR : LONG_LONG_DUR));
-                t.BeginAnimation(TranslateTransform.YProperty, db);
-                setQueue();
-
+                var transformation = new TranslateTransform();
+                TransformGroup.Children.Add(transformation);
+                var destination = -1 * FILD;
+                var animation = new DoubleAnimation(0, destination, TimeSpan.FromSeconds(Road.Lane * LONG_LONG_DUR));
+                transformation.BeginAnimation(TranslateTransform.YProperty, animation);
+                SetQueue();
             }
+
             else
-            { 
+            {
+                var transformation = new TranslateTransform();
+                TransformGroup.Children.Add(transformation);
 
-                var t1 = new TranslateTransform();
-                transformGroup.Children.Add(t1);
-                double dest = CROSSWALK_WIDTH
+                double destination = CROSSWALK_WIDTH
                     + Road.LaneWidth
-                    + (1 - CAR_WIDTH_COEF) * view.Height;
+                    + (1 - CAR_WIDTH_COEF) * View.Height;
 
-                if (CarDirection == 0) dest += (ROAD_WIDTH - Road.LaneWidth);
-                dest *= -1;
+                if (Direction == 0) 
+                    destination += (ROAD_WIDTH - Road.LaneWidth);
 
-                Duration duration = TimeSpan.FromSeconds(CarDirection == 0 ? LONG_DUR:SHORT_DUR);
+                destination *= -1;
 
-                var db1 = new DoubleAnimation(0, dest, duration);
+                Duration duration = TimeSpan.FromSeconds(Direction == 0 ? LONG_DUR : SHORT_DUR);
+                var animation = new DoubleAnimation(0, destination, duration);
 
-                db1.Completed += (s, e) =>
+                animation.Completed += (s, e) =>
                 {
-                    double y = dest - Offset + view.Height / 2;
-                    double x = view.Width / 2;
 
-                    var r = new RotateTransform(0, x, y);
-                    transformGroup.Children.Add(r);
+                    InDelay = true;
+                    double y = destination - Offset + View.Height / 2;
+                    double x = View.Width / 2;
 
-                    var db2 = new DoubleAnimation(0, ((int)CarDirection - 1) * 90, TimeSpan.FromSeconds(SHORT_DUR));
-                    db2.Completed += (s, e) =>
+                    var rotation = new RotateTransform(0, x, y);
+                    TransformGroup.Children.Add(rotation);
+
+                    var animationForRotation = new DoubleAnimation(0, ((int)Direction - 1) * 90, TimeSpan.FromSeconds(SHORT_DUR));
+                    animationForRotation.Completed += (s, e) =>
                     {
-                        if (CarDirection == CarDirections.OnRight) turnRight();
-                        else if (CarDirection == CarDirections.OnLeft) turnLeft();
+                        if (Direction == Directions.OnRight) TurnRight();
+                        else if (Direction == Directions.OnLeft) TurnLeft();
                     };
 
-                    if (CarDirection == CarDirections.OnRight)
+                    if (Direction == Directions.OnRight)
                     {
-                        r.BeginAnimation(RotateTransform.AngleProperty, db2);
+                        rotation.BeginAnimation(RotateTransform.AngleProperty, animationForRotation);
                     }
                     else
                     {
-                        double delayTime = 1;
-                        Timer anStarted = new();
-                        anStarted.Elapsed += new ElapsedEventHandler((object? source, ElapsedEventArgs e) =>
+
+                        var continueToMove = new Timer();
+                        continueToMove.Elapsed += (s, e) =>
                         {
                             Application.Current.Dispatcher.Invoke(() =>
                             {
+                                continueToMove.Stop();
+                                animationForRotation.BeginTime = TimeSpan.FromSeconds(PedestrianDelay);
+                                rotation.BeginAnimation(RotateTransform.AngleProperty, animationForRotation);
 
-                                delayTime = carsToSkip() * 1000;
-                                if(delayTime!=0) setCarsInDelay();
-                              //  Debug.WriteLine("delay" + delayTime);
-                                if (delayTime == 0 || Road.Axis == Axes.Undef)
+                            });
+                        };
+                        continueToMove.Interval = 200;
+
+                        double delayTime = 1;
+                        var anStarted = new Timer();
+                        anStarted.Elapsed += (s,e) =>
+                        {
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                delayTime = CarsToSkip() * TIME_UNIT;
+                                uint toNextYellow = (uint)TrafficLight.GetRemainigTime();
+
+                                // Debug.WriteLine("delay" + delayTime);
+                                if (delayTime == 0 || Road.Axis == Axes.Undef || delayTime > toNextYellow)
                                 {
+                                   // Debug.WriteLine("in if ", delayTime +" " + toNextYellow);
                                     anStarted.Stop();
-                                    db2.BeginTime = TimeSpan.FromMilliseconds(delayTime);
-                                    r.BeginAnimation(RotateTransform.AngleProperty, db2);
+
+                                    if (delayTime > toNextYellow)
+                                        delayTime = toNextYellow + TIME_UNIT;
+
+                                    continueToMove.Start();
                                 }
                                 else
                                 {
-                                    int toNextYellow = TrafficLight.GetRemainigTime();
-                                    if (delayTime > toNextYellow)
-                                    {
-                                        anStarted.Stop();
-                                        delayTime = toNextYellow + 500;
-                                        db2.BeginTime = TimeSpan.FromMilliseconds(delayTime);
-                                        r.BeginAnimation(RotateTransform.AngleProperty, db2);
-
-                                    }
+                                    SetCarsInDelay();
                                     anStarted.Interval = delayTime;
-                                }
-                                
+                                }                                
                             });
-
-                        });
+                        };
                         anStarted.Interval = delayTime;
-                        anStarted.Start();
+                        anStarted.Start();                    
+
+
                     }
-
                 };
-
-                t1.BeginAnimation(TranslateTransform.YProperty, db1);
-
-            }
-             
-
+                transformation.BeginAnimation(TranslateTransform.YProperty, animation);
+            }          
         }
 
-        public void setCarsInDelay()
+        public void PrepareToMove()
         {
-            var restCars = Road.Cars.Where(a => !a.InDelay&& a.RoadPart == RoadPart && a.InLane == InLane);
-            foreach(var car in restCars)
+            if(Road.Cars.Contains(this)) Road.Cars.Remove(this);
+            var movingCar = InMovement
+                .Where(c => c.RoadPart == Road.GetOppositeRoad((int)RoadPart)&&c.InDelay)
+                .FirstOrDefault();
+
+            var checkIfRoadFree = new Timer();
+            checkIfRoadFree.Elapsed += (s, e) =>
             {
-                car.InDelay = true;
+                Application.Current.Dispatcher.BeginInvoke(() =>
+                {
+                    checkIfRoadFree.Enabled = false;
+                    if (Road.Axis == Axes.Undef)
+                    {
+                        Road.Cars.Add(this);
+                        return;
+                    }
+                    else Move();
+                });
+            };
+
+            if (movingCar is not null)
+            {
+                if (Direction != Directions.OnLeft&&InDangerZone.Contains(movingCar))
+                {
+                    Debug.WriteLine("ayyyyyyyy");
+                    checkIfRoadFree.Interval = TIME_UNIT;
+                    checkIfRoadFree.Start();
+                    return;
+                }
+                if (Direction == Directions.OnLeft)
+                {
+                    checkIfRoadFree.Interval = Road.Lane == MAX_LANE_COUNT ? 1 : 1500;
+                    checkIfRoadFree.Start();
+                    return;
+                }
+                else Move();
+            }
+            else
+            {
+                Move();
             }
 
         }
-        public void getCloser()
+
+        public void SetCarsInDelay()
         {
-            Offset += view.Height;
+            var restCars = Road.Cars
+                .Where(a => !a.InDelay
+                && a.RoadPart == RoadPart 
+                && a.InLane == InLane);
 
-            var t = new TranslateTransform();
-            transformGroup.Children.Add(t);
-            double dest = -1 * view.Height;
-
-            DoubleAnimation db = new DoubleAnimation(0, dest, TimeSpan.FromSeconds(SHORT_DUR));
-            t.BeginAnimation(TranslateTransform.YProperty, db);
+            foreach(var car in restCars)
+                car.InDelay = true;
         }
 
-        public void setQueue()
+        public void GetCloser()
+        {
+            Offset += View.Height;
+
+            var transformation = new TranslateTransform();
+            TransformGroup.Children.Add(transformation);
+
+            var destination = -1 * View.Height;
+            var animation = new DoubleAnimation(0, destination, TimeSpan.FromSeconds(SHORT_DUR));
+            transformation.BeginAnimation(TranslateTransform.YProperty, animation);
+        }
+
+        public void SetQueue()
         {
             EndPoint[(int)RoadPart, InLane]--;
             InMovement.Remove(this);
-          //  Debug.WriteLine("get out");
+           // view.Fill = new SolidColorBrush(Colors.Green);
+
             Road.Cars
-                   .Where(a => a.RoadPart == RoadPart && a.InLane == InLane)
+                   .Where(a => a.RoadPart == RoadPart 
+                        && a.InLane == InLane)
                    .ToList().ForEach(a =>
                    {
                        a.QueueIndex--;
                        a.InDelay = false;
                    });
 
+            if(InDangerZone.Contains(this)) InDangerZone.Remove(this);
+
         }
 
-        public void locateOnRoad() {
+        public void LocateOnRoad() {
 
-            view.Width = CAR_WIDTH_COEF * Road.LaneWidth;
-            view.Height = CAR_HEIGHT_COEF * Road.LaneWidth;
+            View.Width = CAR_WIDTH_COEF * Road.LaneWidth;
+            View.Height = CAR_HEIGHT_COEF * Road.LaneWidth;
 
             double xDelta = (1 - CAR_WIDTH_COEF) * Road.LaneWidth / 2;
 
-            if ((CarDirection == 0 ) && Road.Lane == 2)
+            if ((Direction == 0 ) && Road.Lane == 2)
             {
                 InLane = 1;
                 xDelta += xDelta + Road.LaneWidth;
             }
-            double yDelta = EndPoint[(int)RoadPart, InLane]*view.Height + CROSSWALK_WIDTH;
 
-            Canvas.SetRight(view, xDelta);
-            Canvas.SetTop(view, yDelta);
 
-            Road.LanesSet[(int)RoadPart].Children.Add(view);
+            double yDelta = EndPoint[(int)RoadPart, InLane] * View.Height + CROSSWALK_WIDTH;
 
-            QueueIndex = EndPoint[(uint)RoadPart, InLane];
+            Canvas.SetRight(View, xDelta);
+            Canvas.SetTop(View, yDelta);
+
+            Road.LanesSet[(int)RoadPart].Children.Add(View);
+
+            QueueIndex = EndPoint[(int)RoadPart, InLane]; 
             EndPoint[(uint)RoadPart,InLane]++;
 
             var movingParent = InMovement.FirstOrDefault(c => c.RoadPart == RoadPart && c.InLane == InLane);
             if (movingParent != null)
             {
-                getCloser();
-                if (movingParent.CarDirection == CarDirections.OnLeft) InDelay = true;
+                GetCloser();
+                if (movingParent.Direction == Directions.OnLeft) InDelay = true;
             }
             else
             {
-                var parent = Road.Cars.FirstOrDefault(c => c.InLane == InLane && c.RoadPart == RoadPart && c.QueueIndex == QueueIndex - 1);
+                var parent = Road.Cars
+                    .FirstOrDefault(c => 
+                        c.InLane == InLane 
+                        && c.RoadPart == RoadPart 
+                        && c.QueueIndex == QueueIndex - 1
+                        );
+
                 if (parent != null && parent.InDelay) InDelay = true;
+                //if (resolvePosition)
+                //{
+                //    GetCloser();
+                //    var timer = new Timer();
+                //    timer.Interval = SHORT_DUR;
+                //    timer.Elapsed += (s, e) =>
+                //    {
+                //        QueueIndex--;
+                //        timer.Enabled = false;
+                //    };
+                //    timer.Enabled = true;
+
+                //}
+            }
+        }
+
+        public double CarsToSkip()
+        {
+            var delayCars = new List<Car>();
+
+            if (Road.Lane == 1)
+            {
+                var laneCars = Road.Cars.Where(a => a.InDelay == false && (a.RoadPart == Road.GetOppositeRoad((int)RoadPart)));
+
+                foreach (var car in laneCars)
+                {
+                    if (car.Direction == Directions.OnLeft) break;
+                    else
+                    {
+                        delayCars.Add(car);
+                    }
+                }
             }
 
+            else
+            {
+                delayCars = Road.Cars
+                    .Where(a =>
+                    a.InDelay == false
+                        && (a.RoadPart == Road.GetOppositeRoad((int)RoadPart)
+                        && a.InLane==0))
+                   .ToList();
+            }
 
-        }
-        public double carsToSkip()
-        {
-            var delayCars = Road.Cars.Where(a => ((int)a.RoadPart % 2 == (int)Road.Axis) && a.InDelay == false && (a.RoadPart != RoadPart));
-            if (delayCars.Count() == 0) return 0;
-            double count = 0;
+            double time = 0;
             foreach (var c in delayCars)
             {
-                if (c.CarDirection == CarDirections.OnLeft) count += 2;
-                else if (c.CarDirection == CarDirections.OnRight) count += 1.6;
-                else count++;
+                if (c.Direction == Directions.OnRight) 
+                    time += ON_RIGHT_DUR;
+                else time+= STREIGHT_DUR;
             }
-            if (Road.Lane == 2) count *= 0.7;
-            return count;
+            if (Road.Lane == MAX_LANE_COUNT)
+                time *= LANE_SWITCH_COEF;
+            //time += PedestrianDelay;
+            //PedestrianDelay = 0;
+
+            return time;
         }
-        private static int PrevColor { get; set; } = 0;
-        public static uint[,] EndPoint { get; set; } = new uint[4,2] ;
+
+        public static uint[,] EndPoint { get; set; } = new uint[ROADS_COUNT, MAX_LANE_COUNT] ;
         public static ObservableCollection<Car> InMovement { set; get; } = new();
+        public static ObservableCollection<Car> InDangerZone { set; get; } = new();
+
+        
     }
 }
