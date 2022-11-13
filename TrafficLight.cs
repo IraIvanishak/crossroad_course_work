@@ -70,20 +70,21 @@ namespace Crossroad
                 Margin = new Thickness(0, 10, 0, 0),
             };       
 
-            for(int i=0; i<3; i++)
+            for(int i=0; i<TIMERS_COUNT; i++)
             {
-                RowDefinition gridRow = new RowDefinition()
+                var gridRow = new RowDefinition()
                 {
                     Height = new GridLength(LIGHT_SIZE)
                 };
                
                 TLight.RowDefinitions.Add(gridRow);
-                Ellipse circle = new Ellipse()
+                var circle = new Ellipse()
                 {
                     Width = LIGHT_SIZE * LIGHT_SIZE_COEF,
                     Height = LIGHT_SIZE * LIGHT_SIZE_COEF,
                     Fill = new SolidColorBrush(Colors.Gray),
                  };
+
                 Grid.SetRow(circle, i);
                 TLight.Children.Add(circle);
             }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Crossroad"
         mc:Ignorable="d"
-        Title="MainWindow" Name="window"
+        Title="Crossroad" Name="window"
         Height="640" Width="965">
 
 

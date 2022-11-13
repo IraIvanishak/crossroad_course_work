@@ -12,6 +12,7 @@ using System.Windows.Shapes;
 using static Crossroad.RoadSizes;
 using System.Diagnostics;
 
+
 namespace Crossroad
 {
     public class Car
@@ -21,29 +22,8 @@ namespace Crossroad
             RoadPart = roadPart;
             Direction = carDirection;
 
-            var random = new Random();
-            int i = random.Next(DIRECTIONS_COUNT);
-
-            string str ="car";
-            switch (i)
-            {
-                case 0: str += "Blue"; break;
-                case 1: str += "Green"; break;
-                case 2: str += "Pink"; break;
-            }
-
-            switch (carDirection)
-            {
-                case Directions.OnLeft: str += "L"; break;
-                case Directions.OnRight: str += "R"; break;
-            }
-
-            View.Fill = new ImageBrush(new BitmapImage(new
-            Uri("C:\\Users\\user\\Desktop\\Crossroad\\Resources\\" + str + ".png")));
-
-            View.RenderTransform = TransformGroup;
+            GenerateView();
             LocateOnRoad();
-
         }
 
         public Rectangle View { get; set; } = new();
@@ -139,6 +119,7 @@ namespace Crossroad
         public void Move()
         {
             InMovement.Add(this);
+
             var currentLaneCars = Road.Cars
                .Where(a =>
                a.RoadPart == RoadPart
@@ -146,8 +127,6 @@ namespace Crossroad
 
             foreach (var a in currentLaneCars)
                 a.GetCloser();
-
-           // view.Fill = new SolidColorBrush(Colors.Red);
 
             if (Direction == Directions.Straight)
             {
@@ -248,49 +227,43 @@ namespace Crossroad
 
         public void PrepareToMove()
         {
-            if(Road.Cars.Contains(this)) Road.Cars.Remove(this);
+            if(Road.Cars.Contains(this)) 
+                Road.Cars.Remove(this);
+
             var movingCar = InMovement
-                .Where(c => c.RoadPart == Road.GetOppositeRoad((int)RoadPart)&&c.InDelay)
+                .Where(c => c.RoadPart == Road.GetOppositeRoad((int)RoadPart)
+                    && c.InDelay)
                 .FirstOrDefault();
-
-
-
-            var checkIfRoadFree = new Timer();
-            checkIfRoadFree.Elapsed += (s, e) =>
-            {
-                Application.Current.Dispatcher.BeginInvoke(() =>
-                {
-                    checkIfRoadFree.Enabled = false;
-                    if (Road.Axis == Axes.Undef)
-                    {
-                        Road.Cars.Add(this);
-                        return;
-                    }
-                    else Move();
-                    Debug.WriteLine("Start move");
-                });
-            };
 
             if (movingCar is not null)
             {
-                Debug.WriteLine("is not null");
+                var checkIfRoadFree = new Timer();
+                checkIfRoadFree.Elapsed += (s, e) =>
+                {
+                    Application.Current.Dispatcher.BeginInvoke(() =>
+                    {
+                        checkIfRoadFree.Enabled = false;
+                        if (Road.Axis == Axes.Undef)
+                            Road.Cars.Add(this);
+
+                        else Move();
+                    });
+                };
+
                 if (InDangerZone.Contains(movingCar))
                 {
-                    Debug.WriteLine("Danger zone");
                     checkIfRoadFree.Interval = TIME_UNIT;
                     checkIfRoadFree.Start();
                     return;
                 }
                 if (Direction == Directions.OnLeft)
                 {
-                    checkIfRoadFree.Interval = Road.Lane == MAX_LANE_COUNT ? 1 : 1500;
+                    checkIfRoadFree.Interval = Road.Lane == MAX_LANE_COUNT ? 1 : LEFT_DELAY;
                     checkIfRoadFree.Start();
                     return;
                 }
-                else Move();
-            }
-            else Move();
-
+            }            
+            Move();
         }
 
         public void SetCarsInDelay()
@@ -320,19 +293,18 @@ namespace Crossroad
         {
             EndPoint[(int)RoadPart, InLane]--;
             InMovement.Remove(this);
-           // view.Fill = new SolidColorBrush(Colors.Green);
 
             Road.Cars
-                   .Where(a => a.RoadPart == RoadPart 
-                        && a.InLane == InLane)
-                   .ToList().ForEach(a =>
-                   {
-                       a.QueueIndex--;
-                       a.InDelay = false;
-                   });
+                .Where(a => a.RoadPart == RoadPart 
+                    && a.InLane == InLane)
+                .ToList().ForEach(a =>
+                    {
+                        a.QueueIndex--;
+                        a.InDelay = false;
+                    });
 
-            if(InDangerZone.Contains(this)) InDangerZone.Remove(this);
-
+            if(InDangerZone.Contains(this)) 
+                InDangerZone.Remove(this);
         }
 
         public void LocateOnRoad() {
@@ -340,6 +312,7 @@ namespace Crossroad
             View.Width = CAR_WIDTH_COEF * Road.LaneWidth;
             View.Height = CAR_HEIGHT_COEF * Road.LaneWidth;
 
+            double yDelta = EndPoint[(int)RoadPart, InLane] * View.Height + CROSSWALK_WIDTH;
             double xDelta = (1 - CAR_WIDTH_COEF) * Road.LaneWidth / 2;
 
             if ((Direction == 0 ) && Road.Lane == 2)
@@ -348,12 +321,8 @@ namespace Crossroad
                 xDelta += xDelta + Road.LaneWidth;
             }
 
-
-            double yDelta = EndPoint[(int)RoadPart, InLane] * View.Height + CROSSWALK_WIDTH;
-
             Canvas.SetRight(View, xDelta);
             Canvas.SetTop(View, yDelta);
-
             Road.LanesSet[(int)RoadPart].Children.Add(View);
 
             QueueIndex = EndPoint[(int)RoadPart, InLane]; 
@@ -363,21 +332,46 @@ namespace Crossroad
             if (movingParent != null)
             {
                 GetCloser();
-                if (movingParent.Direction == Directions.OnLeft) InDelay = true;
+                if (movingParent.Direction == Directions.OnLeft) 
+                    InDelay = true;
             }
             else
             {
                 var parent = Road.Cars
                     .FirstOrDefault(c => 
-                        c.InLane == InLane 
-                        && c.RoadPart == RoadPart 
-                        && c.QueueIndex == QueueIndex - 1
-                        );
+                    c.InLane == InLane 
+                    && c.RoadPart == RoadPart 
+                    && c.QueueIndex == QueueIndex - 1 );
 
-                if (parent != null && parent.InDelay) InDelay = true;
+                if (parent != null && parent.InDelay) 
+                    InDelay = true;
             }
         }
 
+        public void GenerateView()
+        {
+            var random = new Random();
+            int i = random.Next(CAR_COLORS_COUNT);
+
+            string str = "car";
+            switch (i)
+            {
+                case 0: str += "Blue"; break;
+                case 1: str += "Green"; break;
+                case 2: str += "Pink"; break;
+            }
+
+            switch (Direction)
+            {
+                case Directions.OnLeft: str += "L"; break;
+                case Directions.OnRight: str += "R"; break;
+            }
+
+            View.Fill = new ImageBrush(new BitmapImage(new
+            Uri("Images/" + str + ".png", UriKind.Relative)));
+
+            View.RenderTransform = TransformGroup;
+        }
         public double CarsToSkip()
         {
             var delayCars = new List<Car>();
@@ -416,8 +410,7 @@ namespace Crossroad
             }
             if (Road.Lane == MAX_LANE_COUNT)
                 time *= LANE_SWITCH_COEF;
-            //time += PedestrianDelay;
-            //PedestrianDelay = 0;
+
 
             return time;
         }

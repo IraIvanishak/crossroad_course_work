@@ -10,8 +10,8 @@ namespace Crossroad
     static class RoadSizes
     {
         public const int FILD = 600;
-        public const double ROAD_WIDTH = 177.66; //1.6x
-        public const double CROSS_SQUARE = 177.66; //1.6x
+        public const double ROAD_WIDTH = 177.66;
+        public const double CROSS_SQUARE = 177.66;
         public const double ROAD_CENTRE = ROAD_WIDTH/2;
         public const double ROAD_HEIGHT = 211.11;
         public const double GEWAY_ONE_LANE_WIDTH = ((ROAD_WIDTH - MAIN_MARKING) / 2);
@@ -30,6 +30,9 @@ namespace Crossroad
         public const int PEDESTRIAN_TIME = 700;
         public const int TIME_UNIT = 1000;
         public const int YELLOW_TIME = 3000;
+        public const int LEFT_DELAY = 1500;
+        public const int PEDESTRIAN_DURATION = 5000;
+
         public const int MARGIN_SMAL = 10;
         public const int MARGIN_BIG = 30;
         public const int UNIT_SIZE = 30;
@@ -49,6 +52,8 @@ namespace Crossroad
 
         public const int ROADS_COUNT = 4;
         public const int DIRECTIONS_COUNT = 3;
+        public const int CAR_COLORS_COUNT = 3;
+
         public const int PEDESTRIAN_DIRECTIONS_COUNT = 2;
         public const int TIMERS_COUNT = 3;
         public const int MAX_LANE_COUNT = 2;

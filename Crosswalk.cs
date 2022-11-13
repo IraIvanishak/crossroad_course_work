@@ -44,7 +44,7 @@ namespace Crossroad
                 .ToList()
                 .ForEach(p =>
                 {
-                    p.move();
+                    p.Move();
                     Pedestrians.Remove(p);
                 });
         }
