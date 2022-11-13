@@ -59,8 +59,6 @@ namespace Crossroad
 
         public void TurnLeft()
         {
-            InDangerZone.Add(this);
-           //  View.Fill = new SolidColorBrush(Colors.Red);
 
             var tt = new TranslateTransform();
             TransformGroup.Children.Add(tt);
@@ -76,7 +74,7 @@ namespace Crossroad
 
                 bool stopBeforeCrosswalk = !Road.CrosswalkSet[(int)Road.GetFutureRoad((int)Direction, (int)RoadPart)].IsFree;
                 TimeSpan? time = TimeSpan.Zero;
-                if (stopBeforeCrosswalk) time = TimeSpan.FromSeconds(1);
+                if (stopBeforeCrosswalk) time = TimeSpan.FromMilliseconds(PEDESTRIAN_TIME);
 
                 var lastRoadPart =  - 1 * (FILD / 2 + ROAD_CENTRE + MARGIN_SMAL);
                 var lastPartAnimation = new DoubleAnimation(0, lastRoadPart, TimeSpan.FromSeconds(LONG_DUR*Road.Lane));
@@ -89,8 +87,6 @@ namespace Crossroad
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         SetQueue();
-                      //  View.Fill = new SolidColorBrush(Colors.Green);
-
                         anStarted.Stop();
                     });
                 };
@@ -104,20 +100,23 @@ namespace Crossroad
 
         public void TurnRight()
         {
-            var TT = new TranslateTransform();
-            TransformGroup.Children.Add(TT);
+            bool stopBeforeCrosswalk = !Road.CrosswalkSet[(int)Road
+                .GetFutureRoad((int)Direction, (int)RoadPart)].IsFree;
 
-            bool stopBeforeCrosswalk = !Road.CrosswalkSet[(int)Road.GetFutureRoad((int)Direction, (int)RoadPart)].IsFree;
             TimeSpan? time = TimeSpan.Zero;
             if (stopBeforeCrosswalk)
             {
-                time = TimeSpan.FromSeconds(1);
                 var movingCar = InMovement
                     .Where(c => c.RoadPart == Road.GetOppositeRoad((int)RoadPart))
                     .FirstOrDefault();
                 if (movingCar is not null)
                     movingCar.PedestrianDelay++;
+
+                time = TimeSpan.FromMilliseconds(PEDESTRIAN_TIME);
             }
+
+            var TT = new TranslateTransform();
+            TransformGroup.Children.Add(TT);
 
             var lastRoadPart =  (FILD / 2 + ROAD_CENTRE + MARGIN_SMAL);
             var animation = new DoubleAnimation(0, lastRoadPart, TimeSpan.FromSeconds(Road.Lane * SHORT_DUR));
@@ -207,7 +206,8 @@ namespace Crossroad
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 continueToMove.Stop();
-                                animationForRotation.BeginTime = TimeSpan.FromSeconds(PedestrianDelay);
+                                InDangerZone.Add(this);
+                                animationForRotation.BeginTime = TimeSpan.FromSeconds(PedestrianDelay/Road.Lane);
                                 rotation.BeginAnimation(RotateTransform.AngleProperty, animationForRotation);
 
                             });
@@ -223,28 +223,23 @@ namespace Crossroad
                                 delayTime = CarsToSkip() * TIME_UNIT;
                                 uint toNextYellow = (uint)TrafficLight.GetRemainigTime();
 
-                                // Debug.WriteLine("delay" + delayTime);
-                                if (delayTime == 0 || Road.Axis == Axes.Undef || delayTime > toNextYellow)
+                                if (delayTime == 0 || Road.Axis == Axes.Undef)
                                 {
-                                   // Debug.WriteLine("in if ", delayTime +" " + toNextYellow);
                                     anStarted.Stop();
-
-                                    if (delayTime > toNextYellow)
-                                        delayTime = toNextYellow + TIME_UNIT;
-
                                     continueToMove.Start();
                                 }
                                 else
                                 {
+                                    if (delayTime > toNextYellow)
+                                        delayTime = toNextYellow;
+
                                     SetCarsInDelay();
                                     anStarted.Interval = delayTime;
                                 }                                
                             });
                         };
                         anStarted.Interval = delayTime;
-                        anStarted.Start();                    
-
-
+                        anStarted.Start();              
                     }
                 };
                 transformation.BeginAnimation(TranslateTransform.YProperty, animation);
@@ -258,6 +253,8 @@ namespace Crossroad
                 .Where(c => c.RoadPart == Road.GetOppositeRoad((int)RoadPart)&&c.InDelay)
                 .FirstOrDefault();
 
+
+
             var checkIfRoadFree = new Timer();
             checkIfRoadFree.Elapsed += (s, e) =>
             {
@@ -270,14 +267,16 @@ namespace Crossroad
                         return;
                     }
                     else Move();
+                    Debug.WriteLine("Start move");
                 });
             };
 
             if (movingCar is not null)
             {
-                if (Direction != Directions.OnLeft&&InDangerZone.Contains(movingCar))
+                Debug.WriteLine("is not null");
+                if (InDangerZone.Contains(movingCar))
                 {
-                    Debug.WriteLine("ayyyyyyyy");
+                    Debug.WriteLine("Danger zone");
                     checkIfRoadFree.Interval = TIME_UNIT;
                     checkIfRoadFree.Start();
                     return;
@@ -290,10 +289,7 @@ namespace Crossroad
                 }
                 else Move();
             }
-            else
-            {
-                Move();
-            }
+            else Move();
 
         }
 
@@ -379,19 +375,6 @@ namespace Crossroad
                         );
 
                 if (parent != null && parent.InDelay) InDelay = true;
-                //if (resolvePosition)
-                //{
-                //    GetCloser();
-                //    var timer = new Timer();
-                //    timer.Interval = SHORT_DUR;
-                //    timer.Elapsed += (s, e) =>
-                //    {
-                //        QueueIndex--;
-                //        timer.Enabled = false;
-                //    };
-                //    timer.Enabled = true;
-
-                //}
             }
         }
 
@@ -401,7 +384,9 @@ namespace Crossroad
 
             if (Road.Lane == 1)
             {
-                var laneCars = Road.Cars.Where(a => a.InDelay == false && (a.RoadPart == Road.GetOppositeRoad((int)RoadPart)));
+                var laneCars = Road.Cars.Where(a =>
+                    a.InDelay == false 
+                    && (a.RoadPart == Road.GetOppositeRoad((int)RoadPart)));
 
                 foreach (var car in laneCars)
                 {
@@ -417,8 +402,7 @@ namespace Crossroad
             {
                 delayCars = Road.Cars
                     .Where(a =>
-                    a.InDelay == false
-                        && (a.RoadPart == Road.GetOppositeRoad((int)RoadPart)
+                        (a.RoadPart == Road.GetOppositeRoad((int)RoadPart)
                         && a.InLane==0))
                    .ToList();
             }

@@ -27,6 +27,7 @@ namespace Crossroad
         public const double CROSSWALK_ZEBRA_LINE_WIDTH = 13;
         public const int TRAFFIC_LIGHT_DEF_TIME = 30000;
         public const int UPDATE_TIME = 800;
+        public const int PEDESTRIAN_TIME = 700;
         public const int TIME_UNIT = 1000;
         public const int YELLOW_TIME = 3000;
         public const int MARGIN_SMAL = 10;
@@ -39,7 +40,7 @@ namespace Crossroad
         public const double LANE_SWITCH_COEF = 0.7;
 
         public const double SHORT_SHORT_DUR = 0.25;
-        public const double ON_RIGHT_DUR = 1.4;
+        public const double ON_RIGHT_DUR = 1.5;
         public const double STREIGHT_DUR = 0.9;
         public const double SHORT_DUR = 0.5;
         public const double LONG_DUR = 1.2;
