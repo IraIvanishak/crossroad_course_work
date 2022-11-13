@@ -61,18 +61,20 @@ namespace Crossroad
         public void AnimateMovement()
         {
             GoTimer.Interval = 200;
-            GoTimer.Elapsed += new ElapsedEventHandler((object? source, ElapsedEventArgs e) =>
+            GoTimer.Elapsed += (s, e) =>
             {
-                Application.Current.Dispatcher.Invoke((Action)(() =>
+                Application.Current.Dispatcher.Invoke(() =>
                 {
+                    
                     CurrA = !CurrA;
                     View.Fill = new ImageBrush(new BitmapImage(new
                     Uri("Images/" + "pedestrianManDyn" 
-                        + Convert.ToByte(CurrA).ToString() + ".png")));
+                        + Convert.ToByte(CurrA).ToString() + 
+                        ".png" , UriKind.Relative)));
 
-                }));
+                });
 
-            });
+            };
             GoTimer.Start();
 
             if (Direction == PedestrianDirections.Backward)
@@ -80,7 +82,7 @@ namespace Crossroad
 
             bool ready = false;
 
-            System.Timers.Timer free = new();
+            Timer free = new();
             free.Interval = 900;
             free.Elapsed += (s,o) =>
             {

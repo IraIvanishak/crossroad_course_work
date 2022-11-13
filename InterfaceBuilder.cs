@@ -142,6 +142,20 @@ namespace Crossroad
                 StopMovement();
             };
 
+            Form.clear.Click += (s, e) =>
+            {
+                foreach (var car in Cars)
+                    LanesSet[(int)car.RoadPart].Children.Remove(car.View);
+                foreach (var car in Car.InMovement)
+                    LanesSet[(int)car.RoadPart].Children.Remove(car.View);
+
+                Cars.Clear();
+                Car.InDangerZone.Clear();
+                Car.InMovement.Clear();
+                Car.EndPoint = new uint[ROADS_COUNT, MAX_LANE_COUNT];
+
+            };
+
             return this;
         }
         public InterfaceBuilder BuildTrafficLights()
@@ -237,8 +251,6 @@ namespace Crossroad
                 LaneWidth = GEWAY_TWO_LANE_WIDTH;
                 x.Content = "-";
             }
-
-
 
             for (int j = 0; j < 4; j++)
             {

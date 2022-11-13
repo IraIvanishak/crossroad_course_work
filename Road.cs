@@ -40,7 +40,6 @@ namespace Crossroad
             {
                 Application.Current.Dispatcher.BeginInvoke(() =>
                 {
-                   // Debug.WriteLine("go timer " + DateTime.Now.Second);
                     var workPedestrians = CrosswalkSet
                         .Where(cs => cs.LocAxis == Axis);
 
@@ -54,9 +53,7 @@ namespace Crossroad
                         .ToList();
 
                     foreach (var c in workCars)
-                    {
                         c.PrepareToMove();
-                    }
                 });
             };
             GoTimer.Start();
@@ -67,6 +64,9 @@ namespace Crossroad
             foreach (Car car in Cars)
             {
                 LanesSet[(int)car.RoadPart].Children.Remove(car.View);
+                car.InDelay = false;
+                car.InLane = 0;
+                car.QueueIndex = 0;
                 car.Offset = 0;
                 car.TransformGroup.Children.Clear();
                 car.LocateOnRoad();
@@ -108,14 +108,6 @@ namespace Crossroad
 
                     var availableRoads = new List<RoadParts>()
                             { RoadParts.South,  RoadParts.West, RoadParts.North, RoadParts.East };
-
-                    //if (activeCars is not null)
-                    //{
-                    //    foreach (var activeCar in activeCars)
-                    //    {
-                    //        availableRoads.Remove(GetOppositeRoad((int)activeCar.RoadPart));
-                    //    }
-                    //}
 
                     var r = random.Next(availableRoads.Count);
                     var car = new Car(availableRoads[r],

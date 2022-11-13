@@ -59,6 +59,10 @@ namespace Crossroad
                 var lastRoadPart =  - 1 * (FILD / 2 + ROAD_CENTRE + MARGIN_SMAL);
                 var lastPartAnimation = new DoubleAnimation(0, lastRoadPart, TimeSpan.FromSeconds(LONG_DUR*Road.Lane));
                 lastPartAnimation.BeginTime = time;
+                lastPartAnimation.Completed += (s, o) =>
+                {
+                    Road.LanesSet[(int)RoadPart].Children.Remove(View);
+                };
                 lastTT.BeginAnimation(TranslateTransform.XProperty, lastPartAnimation);
 
                 var anStarted = new Timer();
@@ -101,7 +105,10 @@ namespace Crossroad
             var lastRoadPart =  (FILD / 2 + ROAD_CENTRE + MARGIN_SMAL);
             var animation = new DoubleAnimation(0, lastRoadPart, TimeSpan.FromSeconds(Road.Lane * SHORT_DUR));
             animation.BeginTime = time;
-
+            animation.Completed += (s, o) =>
+            {
+                Road.LanesSet[(int)RoadPart].Children.Remove(View);
+            };
             TT.BeginAnimation(TranslateTransform.XProperty, animation);
             var anStarted = new Timer();
             anStarted.Elapsed += (s, e) =>
@@ -119,7 +126,6 @@ namespace Crossroad
         public void Move()
         {
             InMovement.Add(this);
-
             var currentLaneCars = Road.Cars
                .Where(a =>
                a.RoadPart == RoadPart
@@ -134,6 +140,10 @@ namespace Crossroad
                 TransformGroup.Children.Add(transformation);
                 var destination = -1 * FILD;
                 var animation = new DoubleAnimation(0, destination, TimeSpan.FromSeconds(Road.Lane * LONG_LONG_DUR));
+                animation.Completed += (s, o) =>
+                {
+                    Road.LanesSet[(int)RoadPart].Children.Remove(View);
+                };
                 transformation.BeginAnimation(TranslateTransform.YProperty, animation);
                 SetQueue();
             }
@@ -173,12 +183,10 @@ namespace Crossroad
                     };
 
                     if (Direction == Directions.OnRight)
-                    {
                         rotation.BeginAnimation(RotateTransform.AngleProperty, animationForRotation);
-                    }
+
                     else
                     {
-
                         var continueToMove = new Timer();
                         continueToMove.Elapsed += (s, e) =>
                         {
@@ -191,7 +199,7 @@ namespace Crossroad
 
                             });
                         };
-                        continueToMove.Interval = 200;
+                        continueToMove.Interval = EXTRA_TIME;
 
                         double delayTime = 1;
                         var anStarted = new Timer();
@@ -227,9 +235,7 @@ namespace Crossroad
 
         public void PrepareToMove()
         {
-            if(Road.Cars.Contains(this)) 
-                Road.Cars.Remove(this);
-
+            if (Road.Cars.Contains(this)) Road.Cars.Remove(this);
             var movingCar = InMovement
                 .Where(c => c.RoadPart == Road.GetOppositeRoad((int)RoadPart)
                     && c.InDelay)
@@ -245,7 +251,6 @@ namespace Crossroad
                         checkIfRoadFree.Enabled = false;
                         if (Road.Axis == Axes.Undef)
                             Road.Cars.Add(this);
-
                         else Move();
                     });
                 };
@@ -262,7 +267,7 @@ namespace Crossroad
                     checkIfRoadFree.Start();
                     return;
                 }
-            }            
+            }
             Move();
         }
 
@@ -295,16 +300,18 @@ namespace Crossroad
             InMovement.Remove(this);
 
             Road.Cars
-                .Where(a => a.RoadPart == RoadPart 
-                    && a.InLane == InLane)
-                .ToList().ForEach(a =>
-                    {
-                        a.QueueIndex--;
-                        a.InDelay = false;
-                    });
+                   .Where(a => a.RoadPart == RoadPart 
+                        && a.InLane == InLane)
+                   .ToList().ForEach(a =>
+                   {
+                       a.QueueIndex--;
+                       a.InDelay = false;
+                   });
 
             if(InDangerZone.Contains(this)) 
                 InDangerZone.Remove(this);
+
+
         }
 
         public void LocateOnRoad() {
@@ -312,14 +319,13 @@ namespace Crossroad
             View.Width = CAR_WIDTH_COEF * Road.LaneWidth;
             View.Height = CAR_HEIGHT_COEF * Road.LaneWidth;
 
-            double yDelta = EndPoint[(int)RoadPart, InLane] * View.Height + CROSSWALK_WIDTH;
             double xDelta = (1 - CAR_WIDTH_COEF) * Road.LaneWidth / 2;
-
             if ((Direction == 0 ) && Road.Lane == 2)
             {
                 InLane = 1;
                 xDelta += xDelta + Road.LaneWidth;
             }
+            double yDelta = EndPoint[(int)RoadPart, InLane] * View.Height + CROSSWALK_WIDTH;
 
             Canvas.SetRight(View, xDelta);
             Canvas.SetTop(View, yDelta);
@@ -339,11 +345,12 @@ namespace Crossroad
             {
                 var parent = Road.Cars
                     .FirstOrDefault(c => 
-                    c.InLane == InLane 
-                    && c.RoadPart == RoadPart 
-                    && c.QueueIndex == QueueIndex - 1 );
+                        c.InLane == InLane 
+                        && c.RoadPart == RoadPart 
+                        && c.QueueIndex == QueueIndex - 1
+                        );
 
-                if (parent != null && parent.InDelay) 
+                if (parent != null && parent.InDelay)
                     InDelay = true;
             }
         }
@@ -384,14 +391,12 @@ namespace Crossroad
 
                 foreach (var car in laneCars)
                 {
-                    if (car.Direction == Directions.OnLeft) break;
+                    if (car.Direction == Directions.OnLeft)
+                        break;
                     else
-                    {
                         delayCars.Add(car);
-                    }
                 }
             }
-
             else
             {
                 delayCars = Road.Cars
@@ -410,7 +415,6 @@ namespace Crossroad
             }
             if (Road.Lane == MAX_LANE_COUNT)
                 time *= LANE_SWITCH_COEF;
-
 
             return time;
         }
