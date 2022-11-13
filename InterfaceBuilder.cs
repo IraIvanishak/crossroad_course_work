@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using static Crossroad.Road;
 using static Crossroad.RoadSizes;
 
 namespace Crossroad
@@ -14,6 +13,8 @@ namespace Crossroad
     {
         private MainWindow Form { set; get; } = (MainWindow)Application.Current.Windows[0];
         private Modes Mode { set; get; } = Modes.Manual;
+        public static Road Road { get; set; } = Road.GetRoad();
+
 
         public InterfaceBuilder BuildCrosswalks()
         {
@@ -21,8 +22,8 @@ namespace Crossroad
             {
                 var crosswalk = new Crosswalk((RoadParts)j);
                 Canvas.SetRight(crosswalk.CrosswalkFild, 0);
-                LanesSet[j].Children.Add(crosswalk.CrosswalkFild);
-                CrosswalkSet[j] = crosswalk;
+                Road.LanesSet[j].Children.Add(crosswalk.CrosswalkFild);
+                Road.CrosswalkSet[j] = crosswalk;
             }
 
             return this;
@@ -59,7 +60,7 @@ namespace Crossroad
 
                 Canvas.SetBottom(bListAddCar, 0);
                 Canvas.SetRight(bListAddCar, -GEWAY_ONE_LANE_WIDTH / 3);
-                LanesSet[j / 90].Children.Add(bListAddCar);
+                Road.LanesSet[j / 90].Children.Add(bListAddCar);
                 bPanel[j / 90] = bListAddCar;
 
 
@@ -84,12 +85,12 @@ namespace Crossroad
                 bPedPanel[j / 90] = bAddP1;
                 bPedPanel[j / 90 + 4] = bAddP2;
 
-                bAddP1.Click += new RoutedEventHandler(CrosswalkSet[j / 90].AddPedestrian);
-                bAddP2.Click += new RoutedEventHandler(CrosswalkSet[j / 90].AddPedestrian);
+                bAddP1.Click += new RoutedEventHandler(Road.CrosswalkSet[j / 90].AddPedestrian);
+                bAddP2.Click += new RoutedEventHandler(Road.CrosswalkSet[j / 90].AddPedestrian);
 
                 Canvas.SetRight(bAddP2, 0);
-                CrosswalkSet[j / 90].CrosswalkFild.Children.Add(bAddP1);
-                CrosswalkSet[j / 90].CrosswalkFild.Children.Add(bAddP2);
+                Road.CrosswalkSet[j / 90].CrosswalkFild.Children.Add(bAddP1);
+                Road.CrosswalkSet[j / 90].CrosswalkFild.Children.Add(bAddP2);
 
             }
 
@@ -119,7 +120,7 @@ namespace Crossroad
             Form.manual.Click += (s, e) =>
             {
 
-                if (Reset)
+                if (Road.Reset)
                 {
                     StopMovement();
                     TrafficLight.TLTime = TRAFFIC_LIGHT_DEF_TIME;                    
@@ -144,12 +145,12 @@ namespace Crossroad
 
             Form.clear.Click += (s, e) =>
             {
-                foreach (var car in Cars)
-                    LanesSet[(int)car.RoadPart].Children.Remove(car.View);
+                foreach (var car in Road.Cars)
+                    Road.LanesSet[(int)car.RoadPart].Children.Remove(car.View);
                 foreach (var car in Car.InMovement)
-                    LanesSet[(int)car.RoadPart].Children.Remove(car.View);
+                    Road.LanesSet[(int)car.RoadPart].Children.Remove(car.View);
 
-                Cars.Clear();
+                Road.Cars.Clear();
                 Car.InDangerZone.Clear();
                 Car.InMovement.Clear();
                 Car.EndPoint = new uint[ROADS_COUNT, MAX_LANE_COUNT];
@@ -165,8 +166,8 @@ namespace Crossroad
                 var trafficLight = new TrafficLight();
                 Canvas.SetRight(trafficLight.TLight, -1 * RoadSizes.LIGHT_SIZE);
                 Canvas.SetTop(trafficLight.TLight, RoadSizes.MARGIN_BIG);
-                LanesSet[j].Children.Add(trafficLight.TLight);
-                LightsSet[j] = trafficLight;
+                Road.LanesSet[j].Children.Add(trafficLight.TLight);
+                Road.LightsSet[j] = trafficLight;
             }
 
             return this;
@@ -193,7 +194,7 @@ namespace Crossroad
                 };
                 laneUnit.RenderTransform = r;
                 Form.fild.Children.Add(laneUnit);
-                LanesSet[j / 90] = laneUnit;
+                Road.LanesSet[j / 90] = laneUnit;
             }
 
             return this;
@@ -201,9 +202,9 @@ namespace Crossroad
         }
         public void StopMovement()
         {
-            GoTimer.Enabled = false;
-            PedestrianTimer.Enabled = false;
-            CarTimer.Enabled = false;
+            Road.GoTimer.Enabled = false;
+            Road.PedestrianTimer.Enabled = false;
+            Road.CarTimer.Enabled = false;
             TrafficLight.SwapTimer.Enabled = false;
             TrafficLight.YellowTimer.Enabled = false;
             TrafficLight.TimeFromLasReset = 0;
@@ -219,8 +220,7 @@ namespace Crossroad
             var j = Convert.ToInt16(parent.Tag);
 
             var car = new Car((RoadParts)j, (Directions)Convert.ToInt16(x.Tag));
-            Cars.Add(car);
-            // Debug.WriteLine("created "+ car.RoadPart);
+            Road.Cars.Add(car);
         }
         private void LaneHandler(object sender, RoutedEventArgs e)
         {
@@ -231,32 +231,32 @@ namespace Crossroad
                 for (int i = 0; i < 4; i++)
                 {
                     int index = 0;
-                    for (int j = 0; j < LanesSet[i].Children.Count; j++)
+                    for (int j = 0; j < Road.LanesSet[i].Children.Count; j++)
                     {
-                        if (LanesSet[i].Children[j] is Line)
+                        if (Road.LanesSet[i].Children[j] is Line)
                         {
                             index = j;
                             break;
                         }
                     }
-                    LanesSet[i].Children.RemoveRange(index, 2);
+                    Road.LanesSet[i].Children.RemoveRange(index, 2);
                 }
-                Lane--;
-                LaneWidth = GEWAY_ONE_LANE_WIDTH;
+                Road.Lane--;
+                Road.LaneWidth = GEWAY_ONE_LANE_WIDTH;
                 x.Content = "+";
             }
             else
             {
-                Lane++;
-                LaneWidth = GEWAY_TWO_LANE_WIDTH;
+                Road.Lane++;
+                Road.LaneWidth = GEWAY_TWO_LANE_WIDTH;
                 x.Content = "-";
             }
 
             for (int j = 0; j < 4; j++)
             {
-                for (double i = LaneWidth, q = 1; i < ROAD_WIDTH; i += LaneWidth, q++)
+                for (double i = Road.LaneWidth, q = 1; i < ROAD_WIDTH; i += Road.LaneWidth, q++)
                 {
-                    if (q == Lane)
+                    if (q == Road.Lane)
                     {
                         i += MAIN_MARKING;
                         continue;
@@ -268,32 +268,32 @@ namespace Crossroad
                         X1 = i,
                         X2 = i,
                         Y1 = 0,
-                        Y2 = LanesSet[j].Height * 0.7,
+                        Y2 = Road.LanesSet[j].Height * 0.7,
                         Stroke = new SolidColorBrush(Colors.White),
                     };
                     i += SUB_MARKING;
                     Canvas.SetBottom(line, 0);
-                    LanesSet[j].Children.Add(line);
+                    Road.LanesSet[j].Children.Add(line);
                 }
             }
 
-            Form.val.Content = Lane.ToString();
-            if (Cars.Count != 0) UpdateCars();
+            Form.val.Content = Road.Lane.ToString();
+            if (Road.Cars.Count != 0) Road.UpdateCars();
 
         }
         private void GoHandler(object sender, RoutedEventArgs e)
         {
             if (Mode == Modes.Auto)
             {
-                CarPeriod = Convert.ToDouble(Form.carF.Text) * 1000;
-                PedestrianPeriod = Convert.ToDouble(Form.pedestrianF.Text) * 1000;
+                Road.CarPeriod = Convert.ToDouble(Form.carF.Text) * 1000;
+                Road.PedestrianPeriod = Convert.ToDouble(Form.pedestrianF.Text) * 1000;
                 TrafficLight.TLTime = Convert.ToInt32(Form.lightF.Text) * 1000;
-                GenerateTraffic();
-                if (Reset) GenerationStarted = true;
+                Road.GenerateTraffic();
+                if (Road.Reset) Road.GenerationStarted = true;
             }
-            Go();
+            Road.Go();
             TrafficLight.BuildLightMode();
-            if(!Reset) Reset = true;
+            if(!Road.Reset) Road.Reset = true;
 
         }
 

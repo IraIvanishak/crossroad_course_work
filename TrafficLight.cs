@@ -96,20 +96,22 @@ namespace Crossroad
 
         public static void BuildLightMode()
         {
+            var road = Road.GetRoad();
             if (SwapTimer.Enabled)
             {
                 StartTimer.Stop();
                 SwapTimer.Stop();
                 YellowTimer.Stop();
             }
+            
             for (int i = 0; i < ROADS_COUNT; i++)
-                Road.LightsSet[i].CurrentLight = Colors.Yellow;
-            Road.Axis = Axes.Undef;
+                road.LightsSet[i].CurrentLight = Colors.Yellow;
+            road.Axis = Axes.Undef;
 
             SwapTimer.Interval = TLTime;
             YellowTimer.Interval = TLTime;
 
-            if (!Road.Reset)
+            if (!road.Reset)
             {
                 SwapTimer.Elapsed += (s, e) =>
                 {
@@ -119,12 +121,12 @@ namespace Crossroad
 
                         for (int i = 0; i < ROADS_COUNT; i++)
                         {
-                            Road.LightsSet[i].SwapColors();
+                            road.LightsSet[i].SwapColors();
                         }
 
-                        if (Road.LightsSet[0].CurrentLight == Colors.Green)
-                            Road.Axis = Axes.Vertical;
-                        else Road.Axis = Axes.Horizontal;
+                        if (road.LightsSet[0].CurrentLight == Colors.Green)
+                            road.Axis = Axes.Vertical;
+                        else road.Axis = Axes.Horizontal;
                     });
 
                 };
@@ -139,10 +141,10 @@ namespace Crossroad
 
                         for (int i = 0; i < ROADS_COUNT; i++)
                         {
-                            if (i % 2 == 0) Road.LightsSet[i].CurrentLight = Colors.Red;
-                            else Road.LightsSet[i].CurrentLight = Colors.Green;
+                            if (i % 2 == 0) road.LightsSet[i].CurrentLight = Colors.Red;
+                            else road.LightsSet[i].CurrentLight = Colors.Green;
                         }
-                        Road.Axis = Axes.Horizontal;
+                        road.Axis = Axes.Horizontal;
 
                         SwapTimer.Start();
                         StartTimer.Stop();
@@ -154,8 +156,8 @@ namespace Crossroad
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         for (int i = 0; i < ROADS_COUNT; i++)
-                            Road.LightsSet[i].CurrentLight = Colors.Yellow;
-                        Road.Axis = Axes.Undef;
+                            road.LightsSet[i].CurrentLight = Colors.Yellow;
+                        road.Axis = Axes.Undef;
                     });
                 };
             }

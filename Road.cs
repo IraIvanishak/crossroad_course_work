@@ -11,28 +11,40 @@ using System.Diagnostics;
 
 namespace Crossroad
 {
-    public static class Road
+    public class Road
     {
-        public static Canvas[] LanesSet { set; get; } = new Canvas[ROADS_COUNT];
-        public static Crosswalk[] CrosswalkSet { set; get; } = new Crosswalk[ROADS_COUNT];
-        public static TrafficLight[] LightsSet { set; get; } = new TrafficLight[ROADS_COUNT];
-        public static ObservableCollection<Car> Cars { set; get; } = new();
-        public static Axes Axis { set; get; } = Axes.Horizontal; 
-        public static int Lane { set; get; } = 1;
-        public static double LaneWidth { set; get; } = GEWAY_ONE_LANE_WIDTH;
-        public static bool GenerationStarted { set; get; } = false;
-        public static bool Reset { set; get; } = false;
+        private Road() { }
+
+        private static Road _road;
+
+        public static Road GetRoad()
+        {
+            if (_road == null)
+            {
+                _road = new Road();
+            }
+            return _road;
+        }
+        public Canvas[] LanesSet { set; get; } = new Canvas[ROADS_COUNT];
+        public Crosswalk[] CrosswalkSet { set; get; } = new Crosswalk[ROADS_COUNT];
+        public TrafficLight[] LightsSet { set; get; } = new TrafficLight[ROADS_COUNT];
+        public ObservableCollection<Car> Cars { set; get; } = new();
+        public Axes Axis { set; get; } = Axes.Horizontal; 
+        public int Lane { set; get; } = 1;
+        public double LaneWidth { set; get; } = GEWAY_ONE_LANE_WIDTH;
+        public bool GenerationStarted { set; get; } = false;
+        public bool Reset { set; get; } = false;
 
 
 
-        public static double CarPeriod { set; get; } = 0;
-        public static double PedestrianPeriod { set; get; } = 0;
-        public static Timer GoTimer { set; get; } = new();
-        public static Timer CarTimer { set; get; } = new();
-        public static Timer PedestrianTimer { set; get; } = new();
+        public double CarPeriod { set; get; } = 0;
+        public double PedestrianPeriod { set; get; } = 0;
+        public Timer GoTimer { set; get; } = new();
+        public Timer CarTimer { set; get; } = new();
+        public Timer PedestrianTimer { set; get; } = new();
 
 
-        public static void Go()
+        public void Go()
         {
             GoTimer.Interval = UPDATE_TIME; 
             if(!Reset) 
@@ -58,7 +70,7 @@ namespace Crossroad
             };
             GoTimer.Start();
         }
-        public static void UpdateCars()
+        public void UpdateCars()
         {
             Car.EndPoint = new uint[ROADS_COUNT, MAX_LANE_COUNT];           
             foreach (Car car in Cars)
@@ -71,18 +83,16 @@ namespace Crossroad
                 car.TransformGroup.Children.Clear();
                 car.LocateOnRoad();
             }
-        }
-       
-        
-        public static RoadParts GetOppositeRoad(int r)
+        }        
+        public RoadParts GetOppositeRoad(int r)
         {
             return (RoadParts)((r + 2) % ROADS_COUNT);
         }
-        public static RoadParts GetFutureRoad(int d, int r)
+        public RoadParts GetFutureRoad(int d, int r)
         {
             return (RoadParts)((d + r + 1) % ROADS_COUNT);
         }
-        public static void GenerateTraffic()
+        public void GenerateTraffic()
         {
             var random = new Random();
             var car = new Car((RoadParts)random.Next(ROADS_COUNT),

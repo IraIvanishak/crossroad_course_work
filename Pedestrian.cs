@@ -13,14 +13,17 @@ namespace Crossroad
 {
     public class Pedestrian
     {
-        public Pedestrian(RoadParts road, PedestrianDirections dir)
+        public Pedestrian(RoadParts roadPart, PedestrianDirections dir)
         {
             Direction = dir;
-            RoadPart = road;
+            RoadPart = roadPart;
+
+            var road = Road.GetRoad();
+
             View = new Rectangle()
             {
-                Width = UNIT_SIZE/(Road.Lane),
-                Height = CROSSWALK_ZEBRA_WIDTH/(Road.Lane),
+                Width = UNIT_SIZE/(road.Lane),
+                Height = CROSSWALK_ZEBRA_WIDTH/(road.Lane),
                 Fill = new ImageBrush(new BitmapImage(new
                 Uri("Images/pedestrianManStat.png", UriKind.Relative)))
             };
@@ -32,7 +35,7 @@ namespace Crossroad
                 TransformGroup.Children.Add(r);
             }
             else Canvas.SetRight(View, -1 * MARGIN_BIG);
-            Road.CrosswalkSet[(int)road].CrosswalkFild.Children.Add(View);
+            road.CrosswalkSet[(int)roadPart].CrosswalkFild.Children.Add(View);
         }
 
         private bool CurrA { get; set; } = false;
@@ -60,43 +63,43 @@ namespace Crossroad
 
         public void AnimateMovement()
         {
-            GoTimer.Interval = 200;
+            var road = Road.GetRoad();
+
+            GoTimer.Interval = EXTRA_TIME;
             GoTimer.Elapsed += (s, e) =>
             {
                 Application.Current.Dispatcher.Invoke(() =>
-                {
-                    
+                {                    
                     CurrA = !CurrA;
                     View.Fill = new ImageBrush(new BitmapImage(new
                     Uri("Images/" + "pedestrianManDyn" 
                         + Convert.ToByte(CurrA).ToString() + 
                         ".png" , UriKind.Relative)));
-
                 });
 
             };
             GoTimer.Start();
 
             if (Direction == PedestrianDirections.Backward)
-                Road.CrosswalkSet[(int)RoadPart].IsFree = false;
+                road.CrosswalkSet[(int)RoadPart].IsFree = false;
 
             bool ready = false;
 
             Timer free = new();
-            free.Interval = 900;
+            free.Interval = TIME_UNIT;
             free.Elapsed += (s,o) =>
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     if (Direction == PedestrianDirections.Backward||ready)
                     {
-                        Road.CrosswalkSet[(int)RoadPart].IsFree = true;
+                        road.CrosswalkSet[(int)RoadPart].IsFree = true;
                         free.Stop();
                     }
                     else
                     {
                         ready = true;
-                        Road.CrosswalkSet[(int)RoadPart].IsFree = false;
+                        road.CrosswalkSet[(int)RoadPart].IsFree = false;
                     }
 
                 });

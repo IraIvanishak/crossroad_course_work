@@ -30,6 +30,7 @@ namespace Crossroad
         public TransformGroup TransformGroup { get; set; } = new();
 
         public RoadParts RoadPart { get; set; } = 0;
+        public static Road Road { get; set; } = Road.GetRoad();
         public Directions Direction { get; set; } = 0;
         public uint QueueIndex { get; set; } = 0;
         public uint InLane { get; set; } = 0;
@@ -193,7 +194,6 @@ namespace Crossroad
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 continueToMove.Stop();
-                                InDangerZone.Add(this);
                                 animationForRotation.BeginTime = TimeSpan.FromSeconds(PedestrianDelay/Road.Lane);
                                 rotation.BeginAnimation(RotateTransform.AngleProperty, animationForRotation);
 
@@ -210,8 +210,10 @@ namespace Crossroad
                                 delayTime = CarsToSkip() * TIME_UNIT;
                                 uint toNextYellow = (uint)TrafficLight.GetRemainigTime();
 
-                                if (delayTime == 0 || Road.Axis == Axes.Undef)
+                                
+                                if (delayTime == 0 || Road.GetRoad().Axis == Axes.Undef)
                                 {
+                                    InDangerZone.Add(this);
                                     anStarted.Stop();
                                     continueToMove.Start();
                                 }
